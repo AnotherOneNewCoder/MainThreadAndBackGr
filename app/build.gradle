@@ -85,4 +85,5 @@ dependencies {
     testImplementation "junit:junit:$junit_version"
     androidTestImplementation "androidx.test.ext:junit:$ext_junit_version"
     androidTestImplementation "androidx.test.espresso:espresso-core:$espresso_core_version"
+    implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.2.0-alpha01"
 }

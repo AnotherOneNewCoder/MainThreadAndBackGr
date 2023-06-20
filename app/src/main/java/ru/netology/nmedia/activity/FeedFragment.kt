@@ -59,9 +59,14 @@ class FeedFragment : Fragment() {
             binding.progress.isVisible = state.loading
             binding.errorGroup.isVisible = state.error
             binding.emptyText.isVisible = state.empty
+            binding.refresher.isRefreshing = state.refreshing
         }
 
         binding.retryButton.setOnClickListener {
+            viewModel.loadPosts()
+        }
+        binding.refresher.setColorSchemeResources(R.color.colorAccent)
+        binding.refresher.setOnRefreshListener {
             viewModel.loadPosts()
         }
 
