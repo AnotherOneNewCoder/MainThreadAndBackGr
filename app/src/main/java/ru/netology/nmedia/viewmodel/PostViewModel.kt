@@ -73,8 +73,20 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
 
     fun likeById(post: Post) {
         thread {
-            // Не знаю как написать оптимистичную модель, не знаю как выйти со списка постов на пост и тем более изменить ему значение через лямбду...
-            repository.likeById(post)
+            try {
+                val responsePost = repository.likeById(post)
+
+                _data.postValue(
+                    _data.value?.copy(
+                        posts = (_data.value?.posts?.map { if (it.id == responsePost.id) responsePost else it } ?: listOf())
+                ))
+
+
+            } catch (e: Exception) {
+                // это сделал на случай если отвалится интернет
+                _data.postValue(_data.value?.copy(error = true))
+            }
+
         }
     }
 
