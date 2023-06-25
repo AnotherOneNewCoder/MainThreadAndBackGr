@@ -39,7 +39,7 @@ class FeedFragment : Fragment() {
                     viewModel.unlikeByID(post.id)
                 }
 
-                viewModel.loadPosts()
+                //viewModel.loadPosts()
             }
 
             override fun onRemove(post: Post) {

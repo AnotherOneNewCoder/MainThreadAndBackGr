@@ -83,8 +83,12 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
     fun likeById(id: Long) {
 
         repository.likeByIdAsync(id, object : PostRepository.RepositoryCallback<Post> {
-            override fun onSuccess(posts: Post) {
-                _postCreated.postValue(Unit)
+            override fun onSuccess(post: Post) {
+                _data.postValue(
+                    FeedModel(
+                        posts = _data.value?.posts?.map { if (it.id == post.id) post else it } ?: emptyList()
+                    )
+                )
             }
 
             override fun onError(e: Exception) {
@@ -95,8 +99,12 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
     }
     fun unlikeByID(id: Long) {
         repository.unlikeByIDAsync(id, object : PostRepository.RepositoryCallback<Post>{
-            override fun onSuccess(posts: Post) {
-                _postCreated.postValue(Unit)
+            override fun onSuccess(post: Post) {
+                _data.postValue(
+                    FeedModel(
+                        posts = _data.value?.posts?.map { if (it.id == post.id) post else it } ?: emptyList()
+                    )
+                )
             }
 
             override fun onError(e: Exception) {
