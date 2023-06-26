@@ -71,7 +71,7 @@ class PostRepositoryImpl : PostRepository {
                 }
 
                 override fun onResponse(call: Call, response: Response) {
-                    callback.onSuccess(Post(0L, "", "", "", false, 0))
+                    callback.onSuccess(Post(0L, "", "","" ,"", false, 0))
 
                 }
 
