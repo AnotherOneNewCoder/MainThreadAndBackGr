@@ -9,6 +9,8 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
+import com.google.android.material.snackbar.BaseTransientBottomBar
+import com.google.android.material.snackbar.Snackbar
 import ru.netology.nmedia.R
 import ru.netology.nmedia.adapter.OnInteractionListener
 import ru.netology.nmedia.adapter.PostsAdapter
@@ -39,7 +41,7 @@ class FeedFragment : Fragment() {
                     viewModel.unlikeByID(post.id)
                 }
 
-                viewModel.loadPosts()
+
             }
 
             override fun onRemove(post: Post) {
@@ -66,7 +68,22 @@ class FeedFragment : Fragment() {
             binding.errorGroup.isVisible = state.error
             binding.emptyText.isVisible = state.empty
             binding.refresher.isRefreshing = state.refreshing
+
+            if (state.error) {
+                Snackbar.make(
+                    binding.root,
+                    state.errorCodeMessage,
+                    BaseTransientBottomBar.LENGTH_INDEFINITE,
+
+                )
+                    .setAction("OK"){
+
+                    }
+                    .show()
+            }
         }
+
+
 
         binding.retryButton.setOnClickListener {
             viewModel.loadPosts()
