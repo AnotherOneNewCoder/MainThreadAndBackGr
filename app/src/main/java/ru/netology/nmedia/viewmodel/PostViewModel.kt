@@ -38,11 +38,11 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         _data.value = FeedModel(loading = true)
         repository.getAllAsync(object : PostRepository.RepositoryCallback<List<Post>> {
             override fun onSuccess(posts: List<Post>) {
-                _data.postValue(FeedModel(posts = posts, empty = posts.isEmpty()))
+                _data.value = FeedModel(posts = posts, empty = posts.isEmpty())
             }
 
             override fun onError(e: Exception) {
-                _data.postValue(FeedModel(error = true))
+                _data.value = FeedModel(error = true, errorCodeMessage = e.message.toString())
             }
         })
     }
@@ -56,7 +56,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
                 }
 
                 override fun onError(e: Exception) {
-                    _data.postValue(FeedModel(error = true))
+                    _data.value = FeedModel(errorCodeMessage = e.message.toString())
                 }
             })
 
@@ -82,54 +82,61 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
 
 
     fun likeById(id: Long) {
-
+        val oldList = _data.value?.posts.orEmpty()
+        val updatedList = _data.value?.posts.orEmpty().map {
+            if (it.id == id){
+                it.copy(likedByMe = !it.likedByMe, likes = if(it.likedByMe) it.likes -1 else it.likes + 1)
+            } else it
+        }
+        _data.value = FeedModel(posts = updatedList, empty = updatedList.isEmpty())
         repository.likeByIdAsync(id, object : PostRepository.RepositoryCallback<Post> {
             override fun onSuccess(post: Post) {
-                _data.postValue(
-                    FeedModel(
-                        posts = _data.value?.posts?.map { if (it.id == post.id) post else it } ?: emptyList()
-                    )
-                )
+
             }
 
             override fun onError(e: Exception) {
-                _data.postValue(FeedModel(error = true))
+                _data.value = FeedModel(posts = oldList, empty = oldList.isEmpty(), errorCodeMessage = e.message.toString())
             }
         })
 
     }
     fun unlikeByID(id: Long) {
+        val oldList = _data.value?.posts.orEmpty()
+        val updatedList = _data.value?.posts.orEmpty().map {
+            if (it.id == id){
+                it.copy(likedByMe = !it.likedByMe, likes = if(it.likedByMe) it.likes -1 else it.likes + 1)
+            } else it
+        }
+        _data.value = FeedModel(posts = updatedList, empty = updatedList.isEmpty())
         repository.unlikeByIDAsync(id, object : PostRepository.RepositoryCallback<Post>{
             override fun onSuccess(post: Post) {
-                _data.postValue(
-                    FeedModel(
-                        posts = _data.value?.posts?.map { if (it.id == post.id) post else it } ?: emptyList()
-                    )
-                )
+
             }
 
             override fun onError(e: Exception) {
-                _data.postValue(FeedModel(error = true))
+                _data.value = FeedModel(posts = oldList, empty = oldList.isEmpty() , errorCodeMessage = e.message.toString())
             }
         })
     }
 
 
     fun removeById(id: Long) {
-        val old = _data.value?.posts.orEmpty()
-        repository.removeByIdAsync(id, object : PostRepository.RepositoryCallback<Post> {
-            override fun onSuccess(post: Post) {
-                _data.postValue(
-                    _data.value?.copy(posts = _data.value?.posts.orEmpty()
-                        .filter { it.id != id }
-                    )
-                )
+        val oldList = _data.value?.posts.orEmpty()
+        val updatedList = _data.value?.posts.orEmpty().filter {
+            it.id != id
+        }
+        _data.value = FeedModel(posts = updatedList, empty = updatedList.isEmpty())
+        repository.removeByIdAsync(id, object : PostRepository.RepositoryCallback<Unit> {
+            override fun onSuccess(posts: Unit) {
+
             }
 
             override fun onError(e: Exception) {
-                _data.postValue(_data.value?.copy(posts = old))
+
+                _data.value = FeedModel(posts = oldList, empty = oldList.isEmpty(),errorCodeMessage = e.message.toString())
             }
         })
 
     }
+
 }

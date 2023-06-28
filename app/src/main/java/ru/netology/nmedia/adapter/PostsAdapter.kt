@@ -42,18 +42,20 @@ class PostViewHolder(
 
     fun bind(post: Post) {
         binding.apply {
-            val body = "http://10.0.2.2:9999/avatars/${post.authorAvatar}"
-            val body2 = "http://10.0.2.2:9999/images/${post.attachment?.url}"
+            val pathToAvatarImage = "http://10.0.2.2:9999/avatars/${post.authorAvatar}"
+            val pathToAttachmentImage = "http://10.0.2.2:9999/images/${post.attachment?.url}"
             author.text = post.author
             published.text = post.published
             content.text = post.content
-            avatar.load(body)
+            avatar.load(pathToAvatarImage)
             // в адаптере
             like.isChecked = post.likedByMe
             like.text = "${post.likes}"
             if (post.attachment != null) {
                 postImage.visibility = View.VISIBLE
-                postImage.loadImage(body2)
+                postImage.loadImage(pathToAttachmentImage)
+            } else {
+                postImage.visibility = View.GONE
             }
 
 
