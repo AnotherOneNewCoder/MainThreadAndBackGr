@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -12,6 +13,7 @@ import androidx.navigation.fragment.findNavController
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import ru.netology.nmedia.R
+import ru.netology.nmedia.activity.NewPostFragment.Companion.textArg
 import ru.netology.nmedia.adapter.OnInteractionListener
 import ru.netology.nmedia.adapter.PostsAdapter
 import ru.netology.nmedia.databinding.FragmentFeedBinding
@@ -32,6 +34,9 @@ class FeedFragment : Fragment() {
         val adapter = PostsAdapter(object : OnInteractionListener {
             override fun onEdit(post: Post) {
                 viewModel.edit(post)
+                findNavController().navigate(R.id.action_feedFragment_to_newPostFragment,
+                    Bundle().apply
+                    { textArg = post.content })
             }
 
             override fun onLike(post: Post) {
@@ -69,18 +74,26 @@ class FeedFragment : Fragment() {
             binding.emptyText.isVisible = state.empty
             binding.refresher.isRefreshing = state.refreshing
 
-            if (state.error) {
-                Snackbar.make(
-                    binding.root,
-                    state.errorCodeMessage,
-                    BaseTransientBottomBar.LENGTH_INDEFINITE,
+            val codeAsString = state.errorCodeMessage
+            if (codeAsString.isNotEmpty()){
+                val code = state.errorCodeMessage.toInt()
+                if (code < 200 || code > 299) {
+                    //state.errorCode
+                    Snackbar.make(
+                        binding.root,
+                        state.errorCodeMessage,
+                        BaseTransientBottomBar.LENGTH_INDEFINITE,
 
-                )
-                    .setAction("OK"){
+                        )
+                        .setAction("OK"){
 
-                    }
-                    .show()
+                        }
+                        .show()
+                }
             }
+
+
+
         }
 
 
