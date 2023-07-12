@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -18,6 +17,7 @@ import ru.netology.nmedia.adapter.OnInteractionListener
 import ru.netology.nmedia.adapter.PostsAdapter
 import ru.netology.nmedia.databinding.FragmentFeedBinding
 import ru.netology.nmedia.dto.Post
+import ru.netology.nmedia.util.RetryTypes
 import ru.netology.nmedia.viewmodel.PostViewModel
 
 class FeedFragment : Fragment() {
@@ -67,33 +67,42 @@ class FeedFragment : Fragment() {
             }
         })
         binding.list.adapter = adapter
-        viewModel.data.observe(viewLifecycleOwner) { state ->
-            adapter.submitList(state.posts)
+        viewModel.dataState.observe(viewLifecycleOwner) { state ->
             binding.progress.isVisible = state.loading
             binding.errorGroup.isVisible = state.error
-            binding.emptyText.isVisible = state.empty
             binding.refresher.isRefreshing = state.refreshing
 
-            val codeAsString = state.errorCodeMessage
-            if (codeAsString.isNotEmpty()){
-                val code = state.errorCodeMessage.toInt()
-                if (code < 200 || code > 299) {
-                    //state.errorCode
-                    Snackbar.make(
-                        binding.root,
-                        state.errorCodeMessage,
-                        BaseTransientBottomBar.LENGTH_INDEFINITE,
 
-                        )
-                        .setAction("OK"){
+            if (state.error) {
+                Snackbar.make(
+                    binding.root,
+                    R.string.error_loading,
+                    BaseTransientBottomBar.LENGTH_INDEFINITE,
+
+                    )
+                    .setAction("Retry"){
+                        when(state.retryType) {
+                            RetryTypes.REMOVE -> viewModel.removeById(state.retryId)
+                            RetryTypes.LIKE -> viewModel.likeById(state.retryId)
+                            RetryTypes.UNLIKE -> viewModel.unlikeByID(state.retryId)
+                            RetryTypes.SAVE -> viewModel.retrySave(state.retryPost)
+
+
+                            else -> viewModel.loadPosts()
 
                         }
-                        .show()
-                }
+                    }
+                    .show()
             }
 
 
 
+
+
+        }
+        viewModel.data.observe(viewLifecycleOwner) { state->
+            adapter.submitList(state.posts)
+            binding.emptyText.isVisible = state.empty
         }
 
 
@@ -103,7 +112,7 @@ class FeedFragment : Fragment() {
         }
         binding.refresher.setColorSchemeResources(R.color.colorAccent)
         binding.refresher.setOnRefreshListener {
-            viewModel.loadPosts()
+            viewModel.refreshPosts()
         }
 
         binding.fab.setOnClickListener {

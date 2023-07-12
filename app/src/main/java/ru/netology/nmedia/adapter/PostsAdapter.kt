@@ -4,6 +4,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupMenu
+
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -12,6 +13,7 @@ import ru.netology.nmedia.databinding.CardPostBinding
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.handler.load
 import ru.netology.nmedia.handler.loadImage
+
 
 interface OnInteractionListener {
     fun onLike(post: Post) {}
@@ -56,6 +58,12 @@ class PostViewHolder(
                 postImage.loadImage(pathToAttachmentImage)
             } else {
                 postImage.visibility = View.GONE
+            }
+            if (!post.saved) {
+                published.text = "Waiting for server"
+                like.visibility = View.INVISIBLE
+            } else {
+                like.visibility = View.VISIBLE
             }
 
 
