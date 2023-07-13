@@ -4,13 +4,17 @@ package ru.netology.nmedia.repository
 
 
 
+
 import androidx.lifecycle.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.asRequestBody
+import retrofit2.http.Multipart
 
 import ru.netology.nmedia.api.*
 import ru.netology.nmedia.dao.PostDao
-import ru.netology.nmedia.dto.Post
+import ru.netology.nmedia.dto.*
 import ru.netology.nmedia.entity.PostEntity
 import ru.netology.nmedia.entity.toDto
 import ru.netology.nmedia.entity.toEntity
@@ -18,6 +22,7 @@ import ru.netology.nmedia.error.ApiError
 import ru.netology.nmedia.error.AppError
 import ru.netology.nmedia.error.NetworkError
 import ru.netology.nmedia.error.UnknownError
+import java.io.File
 import java.io.IOException
 
 
@@ -90,6 +95,56 @@ class PostRepositoryImpl(
         dao.removeById(newPostId.id)
     }
 
+    override suspend fun saveWithAttachment(post: Post, upload: MediaUpload) {
+
+        try {
+
+//            val media = uploadMedia(upload)
+//            val response = PostApi.retrofitService.save(post.copy(attachment = Attachments(url = media.id, TypeAttachment.IMAGE)))
+//            if (!response.isSuccessful) {
+//                throw ApiError(response.code(), response.message())
+//            }
+//            val body = response.body() ?: throw ApiError(response.code(), response.message())
+//            val savedOnServerPost = body.copy(saved = true)
+//            //dao.deleteAll()
+//
+//            dao.insert(PostEntity.fromDto(savedOnServerPost))
+
+            val media = uploadMedia(upload)
+            // TODO: add support for other types
+            val postWithAttachment = post.copy(attachment = Attachments(media.id, TypeAttachment.IMAGE))
+            save(postWithAttachment)
+
+
+        } catch (e: IOException) {
+            throw NetworkError
+        } catch (e: Exception) {
+            throw UnknownError
+        }
+
+
+
+    }
+override suspend fun uploadMedia(upload: MediaUpload): Media {
+        try {
+
+
+            val media = MultipartBody.Part.createFormData(
+                "file", upload.file.name, upload.file.asRequestBody()
+            )
+
+            val response = PostApi.retrofitService.uploadMedia(media)
+            if (!response.isSuccessful) {
+                throw ApiError(response.code(), response.message())
+            }
+
+            return response.body() ?: throw ApiError(response.code(), response.message())
+        } catch (e: IOException) {
+            throw NetworkError
+        } catch (e: Exception) {
+            throw UnknownError
+        }
+    }
     override suspend fun removeById(id: Long) {
         try {
             dao.removeById(id)

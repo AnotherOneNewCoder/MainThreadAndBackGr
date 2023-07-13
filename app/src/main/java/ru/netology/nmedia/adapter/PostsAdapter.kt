@@ -45,7 +45,7 @@ class PostViewHolder(
     fun bind(post: Post) {
         binding.apply {
             val pathToAvatarImage = "http://10.0.2.2:9999/avatars/${post.authorAvatar}"
-            val pathToAttachmentImage = "http://10.0.2.2:9999/images/${post.attachment?.url}"
+            val pathToAttachmentImage = "http://10.0.2.2:9999/media/${post.attachment?.url}"
             author.text = post.author
             published.text = post.published
             content.text = post.content

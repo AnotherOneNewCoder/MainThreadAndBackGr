@@ -22,5 +22,6 @@
     <string name="channel_remote_description">Notifications from remote server</string>
     <string name="new_posts_counter">new_posts_counter</string>
     <string name="example">example</string>
+    <string name="clear">Clear</string>
 
 </resources>
