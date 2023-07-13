@@ -79,5 +79,25 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:srcCompat="@drawable/ic_add_24dp" />
+
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+        android:id="@+id/newPosts"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="60dp"
+        android:textColor="@color/white"
+        android:backgroundTint="@color/news"
+        android:contentDescription="@string/new_posts_counter"
+        android:text="@string/example"
+        app:iconTint="@color/white"
+        android:textAlignment="center"
+        app:icon="@drawable/ic_up"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:visibility="invisible"/>
+
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>
 
