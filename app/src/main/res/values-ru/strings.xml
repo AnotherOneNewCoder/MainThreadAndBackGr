@@ -21,5 +21,7 @@
     <string name="notification_user_liked">%1$s поставил лайк посту %2$s</string>
     <string name="channel_remote_name">Уведомления с сервера</string>
     <string name="channel_remote_description">Уведомления с удалённого сервера</string>
+    <string name="new_posts_counter">Счетчик новых постов</string>
+    <string name="example">Пример</string>
 
 </resources>

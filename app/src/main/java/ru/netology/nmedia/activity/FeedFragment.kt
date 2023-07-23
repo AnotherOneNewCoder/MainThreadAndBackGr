@@ -9,6 +9,7 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import ru.netology.nmedia.R
@@ -95,11 +96,9 @@ class FeedFragment : Fragment() {
                     .show()
             }
 
-
-
-
-
         }
+
+
         viewModel.data.observe(viewLifecycleOwner) { state->
             adapter.submitList(state.posts)
             binding.emptyText.isVisible = state.empty
@@ -110,6 +109,31 @@ class FeedFragment : Fragment() {
         binding.retryButton.setOnClickListener {
             viewModel.loadPosts()
         }
+
+        viewModel.newCount.observe(viewLifecycleOwner) {
+            if (it > 0) {
+                binding.apply {
+                    newPosts.visibility = View.VISIBLE
+                    newPosts.text ="New posts: " + it.toString()
+                    newPosts.setOnClickListener {
+                        viewModel.getAllUnhide()
+                        newPosts.visibility = View.INVISIBLE
+                    }
+
+                }
+            } else {
+                binding.newPosts.visibility = View.INVISIBLE
+            }
+        }
+        adapter.registerAdapterDataObserver(object :RecyclerView.AdapterDataObserver(){
+            override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
+                if (positionStart == 0) {
+                    binding.list.smoothScrollToPosition(0)
+
+                }
+            }
+        })
+
         binding.refresher.setColorSchemeResources(R.color.colorAccent)
         binding.refresher.setOnRefreshListener {
             viewModel.refreshPosts()
