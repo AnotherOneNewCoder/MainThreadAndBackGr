@@ -1,9 +1,11 @@
 package ru.netology.nmedia.adapter
 
+
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupMenu
+
 
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -16,6 +18,8 @@ import ru.netology.nmedia.handler.loadImage
 
 
 interface OnInteractionListener {
+
+    fun onImageClicked(uri: String) {}
     fun onLike(post: Post) {}
     fun onEdit(post: Post) {}
     fun onRemove(post: Post) {}
@@ -56,11 +60,14 @@ class PostViewHolder(
             if (post.attachment != null) {
                 postImage.visibility = View.VISIBLE
                 postImage.loadImage(pathToAttachmentImage)
+                postImage.setOnClickListener {
+                    onInteractionListener.onImageClicked(post.attachment.url)
+                }
             } else {
                 postImage.visibility = View.GONE
             }
             if (!post.saved) {
-                published.text = "Waiting for server"
+                published.setText(R.string.waiting)
                 like.visibility = View.INVISIBLE
             } else {
                 like.visibility = View.VISIBLE
@@ -94,8 +101,15 @@ class PostViewHolder(
             share.setOnClickListener {
                 onInteractionListener.onShare(post)
             }
+            // попробую другой вариант, вариант выше почему-то сначала не срабатывал...
+//            postImage.setOnClickListener {
+//                post.attachment?.let { attachments ->
+//                    onInteractionListener.onImageClicked(attachments.url)
+//                }
+//            }
         }
     }
+
 }
 
 class PostDiffCallback : DiffUtil.ItemCallback<Post>() {

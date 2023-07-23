@@ -25,3 +25,4 @@ fun ImageView.loadImage(url: String) {
         .timeout(10_000)
         .into(this)
 }
+

@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -14,6 +15,7 @@ import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import ru.netology.nmedia.R
 import ru.netology.nmedia.activity.NewPostFragment.Companion.textArg
+
 import ru.netology.nmedia.adapter.OnInteractionListener
 import ru.netology.nmedia.adapter.PostsAdapter
 import ru.netology.nmedia.databinding.FragmentFeedBinding
@@ -50,9 +52,14 @@ class FeedFragment : Fragment() {
 
             }
 
+            override fun onImageClicked(uri: String) {
+                findNavController().navigate(R.id.action_feedFragment_to_viewPhotoFragment,
+                    Bundle().apply
+                    { textArg = uri })
+            }
+
             override fun onRemove(post: Post) {
                 viewModel.removeById(post.id)
-                    //viewModel.loadPosts()
             }
 
             override fun onShare(post: Post) {
@@ -67,6 +74,9 @@ class FeedFragment : Fragment() {
                 startActivity(shareIntent)
             }
         })
+
+
+
         binding.list.adapter = adapter
         viewModel.dataState.observe(viewLifecycleOwner) { state ->
             binding.progress.isVisible = state.loading
