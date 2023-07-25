@@ -5,10 +5,14 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.activity.viewModels
 
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
+import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.BaseTransientBottomBar
@@ -21,6 +25,7 @@ import ru.netology.nmedia.adapter.PostsAdapter
 import ru.netology.nmedia.databinding.FragmentFeedBinding
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.util.RetryTypes
+import ru.netology.nmedia.viewmodel.AuthViewModel
 import ru.netology.nmedia.viewmodel.PostViewModel
 
 class FeedFragment : Fragment() {
@@ -33,126 +38,162 @@ class FeedFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         val binding = FragmentFeedBinding.inflate(inflater, container, false)
+        val authViewModel by viewModels<AuthViewModel>()
+        authViewModel.data.observe(viewLifecycleOwner)
+        {
+            val authenticated = authViewModel.isAuthenticated
+            val adapter = PostsAdapter(object : OnInteractionListener {
 
-        val adapter = PostsAdapter(object : OnInteractionListener {
-            override fun onEdit(post: Post) {
-                viewModel.edit(post)
-                findNavController().navigate(R.id.action_feedFragment_to_newPostFragment,
-                    Bundle().apply
-                    { textArg = post.content })
-            }
+                override fun onEdit(post: Post) {
 
-            override fun onLike(post: Post) {
-                if (!post.likedByMe){
-                    viewModel.likeById(post.id)
-                }else{
-                    viewModel.unlikeByID(post.id)
+                    viewModel.edit(post)
+                    findNavController().navigate(R.id.action_feedFragment_to_newPostFragment,
+                        Bundle().apply
+                        { textArg = post.content })
                 }
 
 
-            }
+                override fun onLike(post: Post) {
+                    if (authenticated) {
+                        if (!post.likedByMe) {
+                            viewModel.likeById(post.id)
+                        } else {
+                            viewModel.unlikeByID(post.id)
+                        }
+                    } else {
+                        Snackbar.make(binding.root, getString(R.string.snak_auth), BaseTransientBottomBar.LENGTH_SHORT,
+                            )
+                            .setAction(getString(R.string.confirm)) {
+                                findNavController().navigate(R.id.action_feedFragment_to_logInFragment)
+                            }
+                            .show()
 
-            override fun onImageClicked(uri: String) {
-                findNavController().navigate(R.id.action_feedFragment_to_viewPhotoFragment,
-                    Bundle().apply
-                    { textArg = uri })
-            }
+                    }
 
-            override fun onRemove(post: Post) {
-                viewModel.removeById(post.id)
-            }
 
-            override fun onShare(post: Post) {
-                val intent = Intent().apply {
-                    action = Intent.ACTION_SEND
-                    putExtra(Intent.EXTRA_TEXT, post.content)
-                    type = "text/plain"
                 }
 
-                val shareIntent =
-                    Intent.createChooser(intent, getString(R.string.chooser_share_post))
-                startActivity(shareIntent)
+                override fun onImageClicked(uri: String) {
+                    findNavController().navigate(R.id.action_feedFragment_to_viewPhotoFragment,
+                        Bundle().apply
+                        { textArg = uri })
+                }
+
+                override fun onRemove(post: Post) {
+                    viewModel.removeById(post.id)
+                }
+
+                override fun onShare(post: Post) {
+                    if (authenticated) {
+                        val intent = Intent().apply {
+                            action = Intent.ACTION_SEND
+                            putExtra(Intent.EXTRA_TEXT, post.content)
+                            type = "text/plain"
+                        }
+
+                        val shareIntent =
+                            Intent.createChooser(intent, getString(R.string.chooser_share_post))
+                        startActivity(shareIntent)
+                    } else {
+                        Snackbar.make(binding.root, getString(R.string.snak_auth), BaseTransientBottomBar.LENGTH_SHORT,
+                        )
+                            .setAction(getString(R.string.confirm)) {
+                                findNavController().navigate(R.id.action_feedFragment_to_logInFragment)
+                            }
+                            .show()
+                    }
+                }
+            })
+
+
+
+            binding.list.adapter = adapter
+            viewModel.dataState.observe(viewLifecycleOwner) { state ->
+                binding.progress.isVisible = state.loading
+                binding.errorGroup.isVisible = state.error
+                binding.refresher.isRefreshing = state.refreshing
+
+
+                if (state.error) {
+                    Snackbar.make(
+                        binding.root,
+                        R.string.error_loading,
+                        BaseTransientBottomBar.LENGTH_SHORT,
+
+                        )
+                        .setAction("Retry") {
+                            when (state.retryType) {
+                                RetryTypes.REMOVE -> viewModel.removeById(state.retryId)
+                                RetryTypes.LIKE -> viewModel.likeById(state.retryId)
+                                RetryTypes.UNLIKE -> viewModel.unlikeByID(state.retryId)
+                                RetryTypes.SAVE -> viewModel.retrySave(state.retryPost)
+
+
+                                else -> viewModel.loadPosts()
+
+                            }
+                        }
+                        .show()
+                }
+
             }
-        })
+
+
+            viewModel.data.observe(viewLifecycleOwner) { state ->
+                adapter.submitList(state.posts)
+                binding.emptyText.isVisible = state.empty
+            }
 
 
 
-        binding.list.adapter = adapter
-        viewModel.dataState.observe(viewLifecycleOwner) { state ->
-            binding.progress.isVisible = state.loading
-            binding.errorGroup.isVisible = state.error
-            binding.refresher.isRefreshing = state.refreshing
+            binding.retryButton.setOnClickListener {
+                viewModel.loadPosts()
+            }
 
-
-            if (state.error) {
-                Snackbar.make(
-                    binding.root,
-                    R.string.error_loading,
-                    BaseTransientBottomBar.LENGTH_INDEFINITE,
-
-                    )
-                    .setAction("Retry"){
-                        when(state.retryType) {
-                            RetryTypes.REMOVE -> viewModel.removeById(state.retryId)
-                            RetryTypes.LIKE -> viewModel.likeById(state.retryId)
-                            RetryTypes.UNLIKE -> viewModel.unlikeByID(state.retryId)
-                            RetryTypes.SAVE -> viewModel.retrySave(state.retryPost)
-
-
-                            else -> viewModel.loadPosts()
+            viewModel.newCount.observe(viewLifecycleOwner) {
+                if (it > 0) {
+                    binding.apply {
+                        newPosts.visibility = View.VISIBLE
+                        newPosts.text = "New posts: " + it.toString()
+                        newPosts.setOnClickListener {
+                            viewModel.getAllUnhide()
+                            viewModel.loadPosts()
+                            newPosts.visibility = View.INVISIBLE
 
                         }
+
                     }
-                    .show()
-            }
-
-        }
-
-
-        viewModel.data.observe(viewLifecycleOwner) { state->
-            adapter.submitList(state.posts)
-            binding.emptyText.isVisible = state.empty
-        }
-
-
-
-        binding.retryButton.setOnClickListener {
-            viewModel.loadPosts()
-        }
-
-        viewModel.newCount.observe(viewLifecycleOwner) {
-            if (it > 0) {
-                binding.apply {
-                    newPosts.visibility = View.VISIBLE
-                    newPosts.text ="New posts: " + it.toString()
-                    newPosts.setOnClickListener {
-                        viewModel.getAllUnhide()
-                        newPosts.visibility = View.INVISIBLE
-                    }
-
-                }
-            } else {
-                binding.newPosts.visibility = View.INVISIBLE
-            }
-        }
-        adapter.registerAdapterDataObserver(object :RecyclerView.AdapterDataObserver(){
-            override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
-                if (positionStart == 0) {
-                    binding.list.smoothScrollToPosition(0)
-
+                } else {
+                    binding.newPosts.visibility = View.INVISIBLE
                 }
             }
-        })
+            adapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
+                override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
+                    if (positionStart == 0) {
+                        binding.list.smoothScrollToPosition(0)
 
-        binding.refresher.setColorSchemeResources(R.color.colorAccent)
-        binding.refresher.setOnRefreshListener {
-            viewModel.refreshPosts()
+                    }
+                }
+            })
+
+            binding.refresher.setColorSchemeResources(R.color.colorAccent)
+            binding.refresher.setOnRefreshListener {
+                viewModel.refreshPosts()
+            }
+
+            binding.fab.setOnClickListener {
+                if (authenticated) {
+                    findNavController().navigate(R.id.action_feedFragment_to_newPostFragment)
+                } else {
+                    Snackbar.make(binding.root, getString(R.string.snak_auth), BaseTransientBottomBar.LENGTH_SHORT,
+                    )
+                        .setAction(getString(R.string.confirm)) {
+                            findNavController().navigate(R.id.action_feedFragment_to_logInFragment)
+                        }
+                        .show()
+                }
+            }
         }
-
-        binding.fab.setOnClickListener {
-            findNavController().navigate(R.id.action_feedFragment_to_newPostFragment)
-        }
-
         return binding.root
     }
 }
