@@ -37,5 +37,6 @@
     <string name="sing_up">SING UP</string>
     <string name="fill_all_fields">All fields should be filled!</string>
     <string name="enable_avatar">Enable avatar</string>
+    <string name="clear_photo">clear photo</string>
 
 </resources>

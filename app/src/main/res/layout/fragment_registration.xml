@@ -7,6 +7,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_gravity="center"
     android:background="@color/white">
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/avatars_group"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:constraint_referenced_ids="avatar, take_photo, chooseFromGallery, clearPhoto"/>
     <ImageView
         android:layout_margin="32dp"
         android:id="@+id/avatar"
@@ -16,6 +21,34 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         tools:srcCompat="@tools:sample/avatars"/>
+
+    <ImageButton
+        android:id="@+id/take_photo"
+        android:backgroundTint="@color/news"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="@string/title_camera"
+        app:layout_constraintStart_toStartOf="@id/chooseFromGallery"
+        app:layout_constraintBottom_toTopOf="@id/chooseFromGallery"
+        tools:src="@drawable/ic_add_photo" />
+    <ImageButton
+        android:id="@+id/chooseFromGallery"
+        app:layout_constraintStart_toEndOf="@id/avatar"
+        app:layout_constraintBottom_toTopOf="@id/clearPhoto"
+        android:backgroundTint="@color/news"
+        android:layout_width="wrap_content"
+        android:contentDescription="@string/title_gallery"
+        android:layout_height="wrap_content"
+        tools:src="@drawable/ic_gallary" />
+    <ImageButton
+        android:id="@+id/clearPhoto"
+        app:layout_constraintStart_toEndOf="@id/avatar"
+        app:layout_constraintBottom_toBottomOf="@id/avatar"
+        android:backgroundTint="@color/news"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="@string/clear_photo"
+        tools:src="@drawable/ic_clean" />
     <EditText
         android:id="@+id/name"
         android:layout_width="match_parent"

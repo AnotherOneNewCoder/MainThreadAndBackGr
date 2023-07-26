@@ -12,4 +12,6 @@ interface AuthRepository {
     suspend fun registerUser(login: String, passwd: String, name: String) : User
 
     suspend fun registerWithPhoto(login: String, passwd: String, name: String, upload: MediaUpload): User
+
+    suspend fun uploadMedia(upload: MediaUpload): Media
 }

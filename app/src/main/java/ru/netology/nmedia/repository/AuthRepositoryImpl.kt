@@ -71,4 +71,25 @@ class AuthRepositoryImpl : AuthRepository {
             throw UnknownError
         }
     }
+
+    override suspend fun uploadMedia(upload: MediaUpload): Media {
+        try {
+
+
+            val media = MultipartBody.Part.createFormData(
+                "file", upload.file.name, upload.file.asRequestBody()
+            )
+
+            val response = PostApi.retrofitService.uploadMedia(media)
+            if (!response.isSuccessful) {
+                throw ApiError(response.code(), response.message())
+            }
+
+            return response.body() ?: throw ApiError(response.code(), response.message())
+        } catch (e: IOException) {
+            throw NetworkError
+        } catch (e: Exception) {
+            throw UnknownError
+        }
+    }
 }
