@@ -24,4 +24,8 @@
     <string name="new_posts_counter">Счетчик новых постов</string>
     <string name="example">Пример</string>
 
+    <string name="clear">Очистить</string>
+    <string name="waiting">Ожидается ответ от сервера</string>
+
+
 </resources>

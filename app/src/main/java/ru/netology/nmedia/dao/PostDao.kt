@@ -1,11 +1,9 @@
 package ru.netology.nmedia.dao
 
 import androidx.lifecycle.LiveData
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
-import androidx.room.Query
+import androidx.room.*
 import kotlinx.coroutines.flow.Flow
+import ru.netology.nmedia.dto.TypeAttachment
 import ru.netology.nmedia.entity.PostEntity
 
 @Dao
@@ -47,4 +45,11 @@ interface PostDao {
 
     @Query("DELETE FROM PostEntity")
     suspend fun deleteAll()
+}
+
+class Converters {
+    @TypeConverter
+    fun toAttachmentType(value: String) = enumValueOf<TypeAttachment>(value)
+    @TypeConverter
+    fun fromAttachmentType(value: TypeAttachment) = value.name
 }
