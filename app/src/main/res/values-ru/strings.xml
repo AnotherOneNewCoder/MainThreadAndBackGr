@@ -25,5 +25,27 @@
     <string name="example">Пример</string>
     <string name="clear">Очистить</string>
     <string name="waiting">Ожидается ответ от сервера</string>
+    <string name="logout">Выйти</string>
+    <string name="login">Логин</string>
+    <string name="registration">Регистрация</string>
+    <string name="password">Пароль</string>
+    <string name="sign_in">Войти</string>
+    <string name="snak_auth">Только для авторизованных пользователей</string>
+    <string name="confirm">Подтвердить</string>
+    <string name="incorrect_passwd">Неверный пароль</string>
+    <string name="name">Имя</string>
+    <string name="confirm_password">Подтвердите пароль</string>
+    <string name="sing_up">Зарегистрироваться</string>
+    <string name="fill_all_fields">Все поля должны быть заполнены!</string>
+    <string name="enable_avatar">включить аватарку</string>
+    <string name="clear_photo">Очистить фото</string>
+    <string name="are_you_sure">Вы уверены?</string>
+    <string name="yes">Да</string>
+    <string name="no">Нет</string>
+    <string name="succ_reg">Регистрация выполнена успешно!</string>
+    <string name="succ_log_in">Вы вошли в систему!</string>
+    <string name="avatar">Аватарка</string>
+    <string name="login_enter">Войти</string>
+    <string name="login_dialog">Только для авторизированных пользователей. Перейти на окно авторизации?</string>
 
 </resources>

@@ -18,7 +18,7 @@ import com.google.android.gms.common.GoogleApiAvailability
 import com.google.firebase.messaging.FirebaseMessaging
 import ru.netology.nmedia.R
 import ru.netology.nmedia.activity.NewPostFragment.Companion.textArg
-import ru.netology.nmedia.auth.AppAuth
+
 import ru.netology.nmedia.viewmodel.AuthViewModel
 
 class AppActivity : AppCompatActivity(R.layout.activity_app) {
@@ -80,8 +80,9 @@ class AppActivity : AppCompatActivity(R.layout.activity_app) {
                             true
                         }
                         R.id.logout -> {
-                            AppAuth.getInstance().clear()
-                            findNavController(R.id.nav_host_fragment).navigateUp()
+
+
+                            findNavController(R.id.nav_host_fragment).navigate(R.id.logOutDialog)
                             true
                         }
                         else -> false

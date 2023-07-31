@@ -4,7 +4,7 @@
         <item android:id="@+id/logout" android:title="@string/logout"/>
     </group>
     <group android:id="@+id/unauthorized">
-        <item android:id="@+id/singIn" android:title="@string/login"/>
+        <item android:id="@+id/singIn" android:title="@string/login_enter"/>
         <item android:id="@+id/singUp" android:title="@string/registration"/>
     </group>
 </menu>

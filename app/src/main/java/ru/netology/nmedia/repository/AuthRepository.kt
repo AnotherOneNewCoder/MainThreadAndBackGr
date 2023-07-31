@@ -1,8 +1,7 @@
 package ru.netology.nmedia.repository
 
-import ru.netology.nmedia.dto.Media
 import ru.netology.nmedia.dto.MediaUpload
-import ru.netology.nmedia.dto.Token
+
 import ru.netology.nmedia.dto.User
 
 interface AuthRepository {
@@ -13,5 +12,5 @@ interface AuthRepository {
 
     suspend fun registerWithPhoto(login: String, passwd: String, name: String, upload: MediaUpload): User
 
-    suspend fun uploadMedia(upload: MediaUpload): Media
+
 }

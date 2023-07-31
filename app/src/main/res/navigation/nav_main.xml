@@ -72,4 +72,8 @@
             app:popEnterAnim="@android:anim/fade_in"
             app:popExitAnim="@android:anim/fade_out" />
     </fragment>
+
+    <dialog android:id="@+id/logOutDialog" android:name="ru.netology.nmedia.activity.LogoutDialog" />
+    <dialog android:id="@+id/loginDialog" android:name="ru.netology.nmedia.activity.LoginDialog"/>
+
 </navigation>

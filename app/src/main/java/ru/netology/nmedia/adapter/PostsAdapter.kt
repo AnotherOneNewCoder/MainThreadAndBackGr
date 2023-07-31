@@ -56,7 +56,8 @@ class PostViewHolder(
             content.text = post.content
             avatar.load(pathToAvatarImage)
             // в адаптере
-            like.isChecked = post.likedByMe
+            like.isCheckable = false
+            //like.isChecked = post.likedByMe
             like.text = "${post.likes}"
             if (post.attachment != null) {
                 postImage.visibility = View.VISIBLE
@@ -96,6 +97,8 @@ class PostViewHolder(
             }
 
             like.setOnClickListener {
+                like.isCheckable = true
+                like.isChecked = post.likedByMe
                 onInteractionListener.onLike(post)
             }
 

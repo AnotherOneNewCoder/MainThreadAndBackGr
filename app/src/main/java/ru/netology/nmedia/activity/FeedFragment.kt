@@ -5,8 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
-import androidx.activity.viewModels
+
 
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -61,12 +60,14 @@ class FeedFragment : Fragment() {
                             viewModel.unlikeByID(post.id)
                         }
                     } else {
-                        Snackbar.make(binding.root, getString(R.string.snak_auth), BaseTransientBottomBar.LENGTH_SHORT,
-                            )
-                            .setAction(getString(R.string.confirm)) {
-                                findNavController().navigate(R.id.action_feedFragment_to_logInFragment)
-                            }
-                            .show()
+                        binding.list.
+                        findNavController().navigate(R.id.loginDialog)
+//                        Snackbar.make(binding.root, getString(R.string.snak_auth), BaseTransientBottomBar.LENGTH_SHORT,
+//                            )
+//                            .setAction(getString(R.string.confirm)) {
+//                                findNavController().navigate(R.id.action_feedFragment_to_logInFragment)
+//                            }
+//                            .show()
 
                     }
 
@@ -185,12 +186,13 @@ class FeedFragment : Fragment() {
                 if (authenticated) {
                     findNavController().navigate(R.id.action_feedFragment_to_newPostFragment)
                 } else {
-                    Snackbar.make(binding.root, getString(R.string.snak_auth), BaseTransientBottomBar.LENGTH_SHORT,
-                    )
-                        .setAction(getString(R.string.confirm)) {
-                            findNavController().navigate(R.id.action_feedFragment_to_logInFragment)
-                        }
-                        .show()
+                    findNavController().navigate(R.id.loginDialog)
+//                    Snackbar.make(binding.root, getString(R.string.snak_auth), BaseTransientBottomBar.LENGTH_SHORT,
+//                    )
+//                        .setAction(getString(R.string.confirm)) {
+//                            findNavController().navigate(R.id.action_feedFragment_to_logInFragment)
+//                        }
+//                        .show()
                 }
             }
         }
