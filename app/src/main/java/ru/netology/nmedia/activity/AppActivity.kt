@@ -72,11 +72,40 @@ class AppActivity : AppCompatActivity(R.layout.activity_app) {
                 override fun onMenuItemSelected(menuItem: MenuItem): Boolean =
                     when (menuItem.itemId) {
                         R.id.singUp -> {
-                            findNavController(R.id.nav_host_fragment).navigate(R.id.action_feedFragment_to_registrationFragment)
+//                            findNavController(R.id.nav_host_fragment).navigate(R.id.action_feedFragment_to_registrationFragment)
+//                            true
+                            var enter = true
+
+                            val navController = findNavController(R.id.nav_host_fragment)
+
+                            navController.addOnDestinationChangedListener {  _, destination, _ ->
+
+                                val currentFragment = destination.label.toString()
+
+                                if (currentFragment == "fragment_feed" && enter) {
+
+                                    enter = false
+
+                                    findNavController(R.id.nav_host_fragment).navigate(R.id.action_feedFragment_to_registrationFragment)
+
+                                } else enter = false
+
+                            }
+
                             true
                         }
                         R.id.singIn -> {
-                            findNavController(R.id.nav_host_fragment).navigate(R.id.action_feedFragment_to_logInFragment)
+//                            findNavController(R.id.nav_host_fragment).navigate(R.id.action_feedFragment_to_logInFragment)
+//                            true
+                            var enter = true
+                            val navController = findNavController(R.id.nav_host_fragment)
+                            navController.addOnDestinationChangedListener { _, destination, _ ->
+                                val currentFragment = destination.label.toString()
+                                if (currentFragment == "fragment_feed" && enter) {
+                                    enter = false
+                                    findNavController(R.id.nav_host_fragment).navigate(R.id.action_feedFragment_to_logInFragment)
+                                } else enter = false
+                            }
                             true
                         }
                         R.id.logout -> {
