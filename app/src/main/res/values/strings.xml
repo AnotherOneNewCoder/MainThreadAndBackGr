@@ -24,5 +24,27 @@
     <string name="example">example</string>
     <string name="clear">Clear</string>
     <string name="waiting">Waiting for server</string>
+    <string name="logout">Logout</string>
+    <string name="login">Login</string>
+    <string name="registration">Registration</string>
+    <string name="password">Password</string>
+    <string name="sign_in">Sign In</string>
+    <string name="snak_auth">Need to be authorized</string>
+    <string name="confirm">Confirm</string>
+    <string name="incorrect_passwd">Wrong password</string>
+    <string name="name">Name</string>
+    <string name="confirm_password">Confirm password</string>
+    <string name="sing_up">SING UP</string>
+    <string name="fill_all_fields">All fields should be filled!</string>
+    <string name="enable_avatar">Enable avatar</string>
+    <string name="clear_photo">clear photo</string>
+    <string name="are_you_sure">Are your sure?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="succ_reg">Successful registration</string>
+    <string name="succ_log_in">Logging in done!</string>
+    <string name="avatar">Avatar</string>
+    <string name="login_enter">login_enter</string>
+    <string name="login_dialog">\"Only for authorized users. Would like to visit authorization widget? \"</string>
 
 </resources>

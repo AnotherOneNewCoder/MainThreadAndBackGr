@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupMenu
+import androidx.core.view.isVisible
 
 
 import androidx.recyclerview.widget.DiffUtil
@@ -55,7 +56,8 @@ class PostViewHolder(
             content.text = post.content
             avatar.load(pathToAvatarImage)
             // в адаптере
-            like.isChecked = post.likedByMe
+            like.isCheckable = false
+            //like.isChecked = post.likedByMe
             like.text = "${post.likes}"
             if (post.attachment != null) {
                 postImage.visibility = View.VISIBLE
@@ -73,7 +75,7 @@ class PostViewHolder(
                 like.visibility = View.VISIBLE
             }
 
-
+            menu.isVisible = post.ownedByMe
             menu.setOnClickListener {
                 PopupMenu(it.context, it).apply {
                     inflate(R.menu.options_post)
@@ -95,6 +97,8 @@ class PostViewHolder(
             }
 
             like.setOnClickListener {
+                like.isCheckable = true
+                like.isChecked = post.likedByMe
                 onInteractionListener.onLike(post)
             }
 
