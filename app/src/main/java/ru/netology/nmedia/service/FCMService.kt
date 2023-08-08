@@ -43,17 +43,29 @@ class FCMService : FirebaseMessagingService() {
         try {
 
 
-
-        message.data[action]?.let {
-            when (Action.valueOf(it)) {
-                Action.LIKE -> handleLike(gson.fromJson(message.data[content], Like::class.java))
-                Action.POST -> handlePost(gson.fromJson(message.data[content], notifyPost::class.java))
+            message.data[action]?.let {
+                when (Action.valueOf(it)) {
+                    Action.LIKE -> handleLike(
+                        gson.fromJson(
+                            message.data[content],
+                            Like::class.java
+                        )
+                    )
+                    Action.POST -> handlePost(
+                        gson.fromJson(
+                            message.data[content],
+                            notifyPost::class.java
+                        )
+                    )
+                }
             }
-        }}catch (error: IllegalArgumentException){
+        } catch (error: IllegalArgumentException) {
             errorNotify(gson.fromJson(message.data[content], Notify::class.java))
         }
-        when(push.recipientId) {
-            userId, null -> {sendNotify(push)}
+        when (push.recipientId) {
+            userId, null -> {
+                sendNotify(push)
+            }
             else -> AppAuth.getInstance().sendPushToken()
         }
     }
@@ -121,6 +133,7 @@ class FCMService : FirebaseMessagingService() {
                 .notify(Random.nextInt(100_000), notification)
         }
     }
+
     private fun errorNotify(content: Notify) {
         val notification = NotificationCompat.Builder(this, channelId)
             .setSmallIcon(R.drawable.ic_notification)
