@@ -71,7 +71,10 @@ class FCMService : FirebaseMessagingService() {
     }
 
     override fun onNewToken(token: String) {
-        println(token)
+        getSharedPreferences("my_token", Context.MODE_PRIVATE)
+            .edit()
+            .putString("token", token)
+            .apply()
         AppAuth.getInstance().sendPushToken(token)
     }
 
