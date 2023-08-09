@@ -46,7 +46,7 @@ class AppAuth private constructor(context: Context) {
     }
 
     @Synchronized
-    fun clear(){
+    fun clear() {
         pref.edit { clear() }
         _state.value = null
         sendPushToken()
@@ -54,9 +54,12 @@ class AppAuth private constructor(context: Context) {
 
     fun sendPushToken(token: String? = null) {
         CoroutineScope(Dispatchers.Default).launch {
-            val tokenDto = PushToken(token ?: Firebase.messaging.token.await())
-            kotlin.runCatching {
+            try {
+                val tokenDto = PushToken(token ?: Firebase.messaging.token.await())
+
                 PostApi.retrofitService.sendPushToken(tokenDto)
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
 
         }
@@ -78,6 +81,7 @@ class AppAuth private constructor(context: Context) {
         fun initApp(context: Context) {
             INSTANCE = AppAuth(context)
         }
+
     }
 
 }
