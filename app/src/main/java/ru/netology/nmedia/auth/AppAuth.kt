@@ -3,8 +3,16 @@ package ru.netology.nmedia.auth
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.edit
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.messaging.ktx.messaging
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import ru.netology.nmedia.api.PostApi
+import ru.netology.nmedia.dto.PushToken
 import ru.netology.nmedia.dto.Token
 
 class AppAuth private constructor(context: Context) {
@@ -23,6 +31,7 @@ class AppAuth private constructor(context: Context) {
         } else {
             _state.value = Token(idKey, tokenKey)
         }
+        sendPushToken()
 
     }
 
@@ -33,12 +42,27 @@ class AppAuth private constructor(context: Context) {
             putLong(ID_KEY, id)
         }
         _state.value = Token(id, token)
+        sendPushToken()
     }
 
     @Synchronized
-    fun clear(){
+    fun clear() {
         pref.edit { clear() }
         _state.value = null
+        sendPushToken()
+    }
+
+    fun sendPushToken(token: String? = null) {
+        CoroutineScope(Dispatchers.Default).launch {
+            try {
+                val tokenDto = PushToken(token ?: Firebase.messaging.token.await())
+
+                PostApi.retrofitService.sendPushToken(tokenDto)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+
+        }
     }
 
 
@@ -57,6 +81,7 @@ class AppAuth private constructor(context: Context) {
         fun initApp(context: Context) {
             INSTANCE = AppAuth(context)
         }
+
     }
 
 }

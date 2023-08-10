@@ -48,6 +48,10 @@
     <string name="avatar">Аватарка</string>
     <string name="login_enter">Войти</string>
     <string name="login_dialog">Только для авторизированных пользователей. Перейти на окно авторизации?</string>
+    <string name="notification_user_posted">%1$s запостил пост</string>
+    <string name="error_notification_text">Пожалуйста, обновите приложение для корректной работы</string>
+    <string name="error_notification_title">Вы используете старую версию приложения</string>
+    <string name="notification_user_login">Пользователь зашел под id с номером %1$s</string>
 
 
 </resources>

@@ -13,6 +13,7 @@ import retrofit2.http.*
 import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.dto.Media
 import ru.netology.nmedia.dto.Post
+import ru.netology.nmedia.dto.PushToken
 
 import ru.netology.nmedia.dto.User
 
@@ -90,6 +91,8 @@ interface PostApiService {
         @Part media: MultipartBody.Part,
     ): Response<User>
 
+    @POST("users/push-tokens")
+    suspend fun sendPushToken(@Body token: PushToken): Response<Unit>
 }
 
 object PostApi{

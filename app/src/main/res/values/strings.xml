@@ -18,6 +18,10 @@
     <string name="save">Save</string>
     <string name="google_play_unavailable">Google Api Unavailable</string>
     <string name="notification_user_liked">User %1$s liked %2$s\'s post</string>
+    <string name="notification_user_posted">%1$s posted post</string>
+    <string name="error_notification_text">Please update this application for correct operations</string>
+    <string name="error_notification_title">You are using an old version of this application</string>
+    <string name="notification_user_login">User logged in by %1$s id</string>
     <string name="channel_remote_name">Server notifications</string>
     <string name="channel_remote_description">Notifications from remote server</string>
     <string name="new_posts_counter">new_posts_counter</string>
