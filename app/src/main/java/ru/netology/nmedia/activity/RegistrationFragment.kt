@@ -15,6 +15,7 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.github.dhaval2404.imagepicker.ImagePicker
 import com.google.android.material.snackbar.Snackbar
+import dagger.hilt.android.AndroidEntryPoint
 import ru.netology.nmedia.R
 import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.databinding.FragmentRegistrationBinding
@@ -23,7 +24,10 @@ import ru.netology.nmedia.handler.loadImage
 import ru.netology.nmedia.util.AndroidUtils
 
 import ru.netology.nmedia.viewmodel.RegistrViewModel
+import javax.inject.Inject
 
+
+@AndroidEntryPoint
 class RegistrationFragment : Fragment() {
     private val viewModel: RegistrViewModel by viewModels()
     private val avatarLauncher = registerForActivityResult(
@@ -42,6 +46,8 @@ class RegistrationFragment : Fragment() {
         }
 
     }
+    @Inject
+    lateinit var appAuth: AppAuth
 
 
     override fun onCreateView(
@@ -52,53 +58,11 @@ class RegistrationFragment : Fragment() {
         val binding = FragmentRegistrationBinding.inflate(inflater, container, false)
 
         viewModel.data.observe(viewLifecycleOwner) {
-            AppAuth.getInstance().setAuth(it.id, it.token)
+            appAuth.setAuth(it.id, it.token)
             Toast.makeText(requireContext(), getString(R.string.succ_reg), Toast.LENGTH_SHORT).show()
             findNavController().navigateUp()
         }
-//        if (binding.enableAvatar.isActivated) {
-//            binding.avatarsGroup.isVisible = false
-//            viewModel.state.observe(viewLifecycleOwner) { state ->
-//                if (state.registrationError) {
-//                    Snackbar.make(binding.root, "Registration error", Snackbar.LENGTH_INDEFINITE)
-//                        .setAction(R.string.retry_loading) {
-//                            viewModel.register(
-//                                login = binding.login.text.toString(),
-//                                passwd = binding.password.text.toString(),
-//                                name = binding.name.text.toString()
-//                            )
-//                        }
-//                        .show()
-//                }
-//
-//            }
-//
-//
-//            binding.apply {
-//                name.requestFocus()
-//                enter.setOnClickListener {
-//                    if (password.text.toString() == confirmPassword.text.toString()
-////                    && !password.text.isNullOrBlank()
-////                    && !login.text.isNullOrBlank()
-////                    && !name.text.isNullOrBlank()
-//                    ) {
-//                        viewModel.register(
-//                            login = login.text.toString(),
-//                            passwd = password.text.toString(),
-//                            name = name.text.toString()
-//                        )
-//
-//                        AndroidUtils.hideKeyboard(requireView())
-//
-//                    } else
-//                        Toast.makeText(
-//                            requireContext(),
-//                            getString(R.string.fill_all_fields),
-//                            Toast.LENGTH_SHORT
-//                        ).show()
-//                }
-//            }
-//        } else {
+
 
             viewModel.state.observe(viewLifecycleOwner) { state ->
                 if (state.registrationError) {

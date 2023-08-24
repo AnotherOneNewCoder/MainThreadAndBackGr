@@ -6,6 +6,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import ru.netology.nmedia.BuildConfig.BASE_URL
 import ru.netology.nmedia.activity.NewPostFragment.Companion.textArg
 
@@ -13,7 +15,8 @@ import ru.netology.nmedia.activity.NewPostFragment.Companion.textArg
 import ru.netology.nmedia.databinding.FragmentViewPhotoBinding
 import ru.netology.nmedia.handler.loadImage
 
-
+@AndroidEntryPoint
+@ExperimentalCoroutinesApi
 class ViewPhotoFragment : Fragment() {
 
     override fun onCreateView(

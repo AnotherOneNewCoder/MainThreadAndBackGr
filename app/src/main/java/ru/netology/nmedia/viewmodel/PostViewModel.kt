@@ -1,16 +1,16 @@
 package ru.netology.nmedia.viewmodel
 
-import android.app.Application
-import android.net.Uri
 
+import android.net.Uri
 import androidx.lifecycle.*
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import ru.netology.nmedia.auth.AppAuth
-import ru.netology.nmedia.db.AppDb
 import ru.netology.nmedia.dto.MediaUpload
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.model.FeedModel
@@ -20,6 +20,7 @@ import ru.netology.nmedia.repository.*
 import ru.netology.nmedia.util.RetryTypes
 import ru.netology.nmedia.util.SingleLiveEvent
 import java.io.File
+import javax.inject.Inject
 
 
 private val empty = Post(
@@ -33,11 +34,15 @@ private val empty = Post(
     published = "",
     ownedByMe = false,
 )
+@HiltViewModel
+@ExperimentalCoroutinesApi
+class PostViewModel @Inject constructor(
+    private val repository: PostRepository,
+    auth: AppAuth
+) : ViewModel(){
 
-class PostViewModel(application: Application) : AndroidViewModel(application) {
-    // упрощённый вариант
-    private val repository: PostRepository = PostRepositoryImpl(AppDb.getInstance(context = application).postDao())
-    val data: LiveData<FeedModel> = AppAuth.getInstance().state.flatMapLatest { token ->
+
+    val data: LiveData<FeedModel> = auth.state.flatMapLatest { token ->
         repository.data
             .map { posts->
                 FeedModel(posts.map {
