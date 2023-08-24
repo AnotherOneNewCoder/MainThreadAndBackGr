@@ -2,6 +2,7 @@
 buildscript {
     ext.kotlin_version = "1.8.21"
     ext.android_gradle_version = "7.4.2"
+    ext.hilt_version = "2.47"
 }
 
 plugins {
@@ -9,6 +10,9 @@ plugins {
     id 'com.android.application' version "$android_gradle_version" apply false
     id 'com.android.library' version "$android_gradle_version" apply false
     id 'org.jetbrains.kotlin.android' version "$kotlin_version" apply false
+    id 'com.google.dagger.hilt.android' version "$hilt_version" apply false
+
+
 }
 
 subprojects {

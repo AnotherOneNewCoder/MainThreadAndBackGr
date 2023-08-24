@@ -11,11 +11,17 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
+import androidx.paging.LoadState
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.collectLatest
 import ru.netology.nmedia.R
 import ru.netology.nmedia.activity.NewPostFragment.Companion.textArg
 
@@ -27,6 +33,8 @@ import ru.netology.nmedia.util.RetryTypes
 import ru.netology.nmedia.viewmodel.AuthViewModel
 import ru.netology.nmedia.viewmodel.PostViewModel
 
+@AndroidEntryPoint
+@ExperimentalCoroutinesApi
 class FeedFragment : Fragment() {
 
     private val viewModel: PostViewModel by activityViewModels()
@@ -41,6 +49,7 @@ class FeedFragment : Fragment() {
         authViewModel.data.observe(viewLifecycleOwner)
         {
             val authenticated = authViewModel.isAuthenticated
+
             val adapter = PostsAdapter(object : OnInteractionListener {
 
                 override fun onEdit(post: Post) {
@@ -60,8 +69,7 @@ class FeedFragment : Fragment() {
                             viewModel.unlikeByID(post.id)
                         }
                     } else {
-                        binding.list.
-                        findNavController().navigate(R.id.loginDialog)
+                        binding.list.findNavController().navigate(R.id.loginDialog)
 //                        Snackbar.make(binding.root, getString(R.string.snak_auth), BaseTransientBottomBar.LENGTH_SHORT,
 //                            )
 //                            .setAction(getString(R.string.confirm)) {
@@ -96,7 +104,10 @@ class FeedFragment : Fragment() {
                             Intent.createChooser(intent, getString(R.string.chooser_share_post))
                         startActivity(shareIntent)
                     } else {
-                        Snackbar.make(binding.root, getString(R.string.snak_auth), BaseTransientBottomBar.LENGTH_SHORT,
+                        Snackbar.make(
+                            binding.root,
+                            getString(R.string.snak_auth),
+                            BaseTransientBottomBar.LENGTH_SHORT,
                         )
                             .setAction(getString(R.string.confirm)) {
                                 findNavController().navigate(R.id.action_feedFragment_to_logInFragment)
@@ -105,6 +116,7 @@ class FeedFragment : Fragment() {
                     }
                 }
             })
+            adapter.refresh()
 
 
 
@@ -139,10 +151,16 @@ class FeedFragment : Fragment() {
 
             }
 
+            // before paging
+//            viewModel.data.observe(viewLifecycleOwner) { state ->
+//                adapter.submitList(state.posts)
+//                binding.emptyText.isVisible = state.empty
+//            }
 
-            viewModel.data.observe(viewLifecycleOwner) { state ->
-                adapter.submitList(state.posts)
-                binding.emptyText.isVisible = state.empty
+            lifecycleScope.launchWhenCreated {
+                viewModel.data.collectLatest {
+                    adapter.submitData(it)
+                }
             }
 
 
@@ -177,6 +195,13 @@ class FeedFragment : Fragment() {
                 }
             })
 
+            lifecycleScope.launchWhenCreated {
+                adapter.loadStateFlow.collectLatest {
+                    binding.refresher.isRefreshing = it.refresh is LoadState.Loading || it.append is LoadState.Loading ||
+                            it.prepend is LoadState.Loading
+                }
+            }
+
             binding.refresher.setColorSchemeResources(R.color.colorAccent)
             binding.refresher.setOnRefreshListener {
                 viewModel.refreshPosts()
@@ -195,6 +220,7 @@ class FeedFragment : Fragment() {
 //                        .show()
                 }
             }
+
         }
         return binding.root
     }

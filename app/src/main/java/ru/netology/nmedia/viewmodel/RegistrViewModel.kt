@@ -5,19 +5,22 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import ru.netology.nmedia.dto.MediaUpload
 import ru.netology.nmedia.dto.User
 import ru.netology.nmedia.model.FeedModelState
 import ru.netology.nmedia.model.PhotoModel
-import ru.netology.nmedia.repository.AuthRepositoryImpl
-import ru.netology.nmedia.util.RetryTypes
+import ru.netology.nmedia.repository.AuthRepository
 import java.io.File
+import javax.inject.Inject
 
-private val noAvatar = PhotoModel()
 
-class RegistrViewModel : ViewModel() {
-    private val repository = AuthRepositoryImpl()
+@HiltViewModel
+class RegistrViewModel @Inject constructor(
+    private val repository: AuthRepository
+) : ViewModel() {
+
     private val _data = MutableLiveData<User>()
     val data: LiveData<User>
         get() = _data
@@ -61,9 +64,7 @@ class RegistrViewModel : ViewModel() {
         }
     }
 
-    fun setAvatar(photoModel: PhotoModel) {
-        _avatar.value = photoModel
-    }
+
 
     fun clearPhoto() {
         _avatar.value = null

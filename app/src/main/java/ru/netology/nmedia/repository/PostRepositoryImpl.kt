@@ -6,11 +6,14 @@ package ru.netology.nmedia.repository
 
 
 import androidx.lifecycle.*
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingSource
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
-import retrofit2.http.Multipart
+
 
 import ru.netology.nmedia.api.*
 import ru.netology.nmedia.dao.PostDao
@@ -22,21 +25,35 @@ import ru.netology.nmedia.error.ApiError
 import ru.netology.nmedia.error.AppError
 import ru.netology.nmedia.error.NetworkError
 import ru.netology.nmedia.error.UnknownError
-import java.io.File
+
 import java.io.IOException
+import javax.inject.Inject
 
 
-class PostRepositoryImpl(
-    private val dao: PostDao
+class PostRepositoryImpl @Inject constructor(
+    private val dao: PostDao,
+    private val apiService: PostApiService
 ) : PostRepository {
 
-    override val data = dao.getAllVisible()
+    // before paging and done it in order to newCount could work
+    // пришлось создать для работы newCount
+    override val dataForNewCountPosts = dao.getAllVisible()
         .map(List<PostEntity>::toDto)
         .flowOn(Dispatchers.Default)
 
+
+    override val data = Pager(
+        config = PagingConfig(
+            pageSize = 10,
+            enablePlaceholders = false,
+        ), pagingSourceFactory = {
+            PostPagingSource(apiService)
+        }
+    ).flow
+
     override suspend fun getAll() {
         try {
-            val response = PostApi.retrofitService.getAll()
+            val response = apiService.getAll()
             if (!response.isSuccessful) {
                 throw ApiError(response.code(), response.message())
             }
@@ -55,7 +72,7 @@ class PostRepositoryImpl(
     override fun getNewerCount(id: Long): Flow<Int> = flow {
         while (true) {
             delay(10_000L)
-            val response = PostApi.retrofitService.getNewer(id)
+            val response = apiService.getNewer(id)
             if (!response.isSuccessful) {
                 throw ApiError(response.code(), response.message())
             }
@@ -73,7 +90,7 @@ class PostRepositoryImpl(
         val newPostId = post.copy(id = 9_223_372_036_854_775_800)
         try {
             dao.insert(PostEntity.fromDto(newPostId))
-            val response = PostApi.retrofitService.save(post)
+            val response = apiService.save(post)
             if (!response.isSuccessful) {
                 throw ApiError(response.code(), response.message())
             }
@@ -133,7 +150,7 @@ override suspend fun uploadMedia(upload: MediaUpload): Media {
                 "file", upload.file.name, upload.file.asRequestBody()
             )
 
-            val response = PostApi.retrofitService.uploadMedia(media)
+            val response = apiService.uploadMedia(media)
             if (!response.isSuccessful) {
                 throw ApiError(response.code(), response.message())
             }
@@ -148,7 +165,7 @@ override suspend fun uploadMedia(upload: MediaUpload): Media {
     override suspend fun removeById(id: Long) {
         try {
             dao.removeById(id)
-            val response = PostApi.retrofitService.removeById(id)
+            val response = apiService.removeById(id)
             if (!response.isSuccessful) {
                 throw ApiError(response.code(), response.message())
             }
@@ -165,7 +182,7 @@ override suspend fun uploadMedia(upload: MediaUpload): Media {
     override suspend fun unlikeByID(id: Long) {
         try {
             dao.likeById(id)
-            val response = PostApi.retrofitService.unlikeById(id)
+            val response = apiService.unlikeById(id)
             if (!response.isSuccessful) {
                 throw ApiError(response.code(), response.message())
             }
@@ -185,7 +202,7 @@ override suspend fun uploadMedia(upload: MediaUpload): Media {
     override suspend fun likeById(id: Long) {
         try {
             dao.likeById(id)
-            val response = PostApi.retrofitService.likeById(id)
+            val response = apiService.likeById(id)
             if (!response.isSuccessful) {
                 throw ApiError(response.code(), response.message())
             }

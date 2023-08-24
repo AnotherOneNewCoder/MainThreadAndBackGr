@@ -1,194 +1,45 @@
-# Домашнее задание к занятию «14. Регистрация, аутентификация и авторизация»
+# Домашнее задание к занятию «1.2. Architecture Components. Часть 1»
 
-Выполненное задание прикрепите ссылкой на ваши GitHub-проекты в личном кабинете студента на сайте [netology.ru](https://netology.ru).
+В качестве результата пришлите ссылки на ваш GitHub-проект в личном кабинете студента на сайте [netology.ru](https://netology.ru).
 
 **Важно**: ознакомьтесь со ссылками на главной странице [репозитория с домашними заданиями](../README.md).
 
-**Важно**: если у вас что-то не получилось, оформите Issue. [Шаблон для оформления](../report-requirements.md).
+**Важно**: если у вас что-то не получилось, оформите Issue [по установленным правилам](../report-requirements.md).
 
 ## Как сдавать задачи
 
-1. Откройте ваш проект Android-приложения с предыдущего ДЗ (можете брать код из лекции).
+1. Откройте ваш проект Android-приложения из предыдущего ДЗ, можете брать код из лекции.
 1. Сделайте необходимые коммиты.
-1. Сделайте пуш. Удостоверьтесь, что ваш код появился на GitHub.
-1. Ссылку на ваш проект прикрепите в личном кабинете на сайте [netology.ru](https://netology.ru).
-1. Необязательные задачи можно не выполнять. На зачёт это не повлияет.
+1. Сделайте push. Убедитесь, что ваш код появился на GitHub.
+1. Ссылку на ваш проект отправьте в личном кабинете на сайте [netology.ru](https://netology.ru).
+1. Задачи, отмеченные как необязательные, можно не сдавать. Это не повлияет на получение зачёта.
 
-## Задача №1. Аутентификация
+## Задача. Refresh on Login/Logout
 
 ### Описание
 
-При нажатии на пункт меню «Sign in» реализуйте следующую последовательность действий:
-
-1\. Открытие фрагмента с двумя полями (логин и пароль) и кнопкой «Войти». Создайте для этого фрагмента собственную `ViewModel`.
-
-2\. Отправку запроса вида:
-
-```http request
-POST http://localhost:9999/api/users/authentication
-Content-Type: application/x-www-form-urlencoded
-
-login=student&pass=secret
-```
-
-В ответ вам придёт JSON вида:
-```json
-{
-  "id": 6,
-  "token": "j/cAPk6GZEm7Vmq..."
-}
-```
-
-Где `id` — идентификатор пользователя с логином `student` и паролем `secret`, а `token` — это и есть токен.
-
-Как отправлять формы формата `form-encoded` (`application/x-www-form-urlencoded`), смотрите в [документации на Retrofit](https://square.github.io/retrofit/).
-
-<details>
-<summary>Если не нашли, как отправлять форму:</summary>
-
-```kotlin
-@FormUrlEncoded
-@POST("users/authentication")
-suspend fun updateUser(@Field("login") login: String, @Field("pass") pass: String): Response<ваш_тип>
-```
-
-</details>
-
-3\. Сохраните указанную пару в `AppAuth`.
-
-4\. Вернитесь на предыдущий фрагмент, с которого вы попали на фрагмент аутентификации.
-
-Убедитесь, что меню в `ActionBar` и карточки постов, автором которых вы являетесь, обновились.
+Измените код из лекции так, чтобы при login/logout данные запрашивались с сервера заново.
 
 ### Результат
 
 Опубликуйте изменения в виде Pull Request в вашем проекте на GitHub.
 
-Результат пришлите ссылкой на PR GitHub-проект в личном кабинете студента на сайте [netology.ru](https://netology.ru).
+В качестве результата пришлите ссылку на PR GitHub-проект в личном кабинете студента на сайте [netology.ru](https://netology.ru).
 
-## Задача №2. `Sign In to ...` и `Are you sure?`*
+## Задача. PagingSource from DB*
 
-**Важно**: это необязательная задача. Её можно не выполнять. На зачёт это не повлияет.
+**Важно**: это необязательная задача. Её (не)выполнение не влияет на получение зачёта по ДЗ.
 
 ### Описание
 
-Реализуйте следующую функциональность:
+После окончания курса вам придётся часто ориентироваться на примеры, которые выкладываются самим Google, демонстрирующим использование той или иной библиотеки, в том числе из Jetpack.
 
-1\. Когда на экране находится лента постов в `PostViewModel`, проходит проверка, аутентифицирован ли пользователь. Проверка проходит при:
-* добавлении поста (нажатие на `Fab` +);
-* лайке поста.
+Попробуйте переписать приложение из лекции так, чтобы оно использовало данные из локальной БД. В сеть ходить не надо — ни для запроса постов, ни для создания, ни для удаления.
 
-Если пользователь не аутентифицирован, появляется диалоговое окно с предложением пройти аутентификацию. Перенаправляйте пользователя на фрагмент аутентификации, который вы реализовали в предыдущем пункте.
-
-2\. При создании поста возникает диалоговое окно с подтверждением выхода, если пользователь в `ActionBar` выбрал пункт меню `Sign Out`.
-
-Если пользователь подтвердил выход, перенаправляйте на предыдущий фрагмент.
+Пример проекта, который использует Paging v3 для работы с локальной БД: [PagingSample](https://github.com/android/architecture-components-samples/tree/main/PagingSample).
 
 ### Результат
 
 Опубликуйте изменения в виде Pull Request в вашем проекте на GitHub.
 
-Результат пришлите ссылкой на PR GitHub-проект в личном кабинете студента на сайте [netology.ru](https://netology.ru).
-
-## Задача №3. Регистрация*
-
-**Важно**: это необязательная задача. Её можно не выполнять. На зачёт это не повлияет.
-
-### Описание
-
-Реализуйте при нажатии на пункт меню «Sign Up» следующую последовательность действий:
-
-1\. Открывается фрагмент с 4 полями (имя, логин, пароль и подтверждение пароля) и кнопкой «Зарегистрироваться». Создайте для этого фрагмента собственную `ViewModel`.
-
-2\. Отправляется запроса вида:
-
-```http request
-POST /api/users/registration
-Content-Type: application/x-www-form-urlencoded
-
-login=noname&pass=secret&name=NoName
-```
-
-В ответ вам придёт JSON вида:
-```json
-{
-  "id": 7,
-  "token": "j/cAPk6GZEm7Vmq..."
-}
-```
-
-где `id` — идентификатор созданного пользователя, а `token` — это и есть токен.
-
-Как отправлять формы формата `form-encoded` (`application/x-www-form-urlencoded`), смотрите в документации на Retrofit.
-
-<details>
-<summary>Если не нашли, как отправлять форму:</summary>
-
-```kotlin
-@FormUrlEncoded
-@POST("users/registration")
-suspend fun registerUser(@Field("login") login: String, @Field("pass") pass: String, @Field("name") name: String): Response<ваш_тип>
-```
-
-</details>
-
-3\. Сохраните указанную пару в `AppAuth`.
-
-4\. Вернитесь на предыдущий фрагмент, с которого вы попали на фрагмент регистрации.
-
-Убедитесь, что меню в `ActionBar` и карточки постов, автором которых вы являетесь, обновились.
-
-### Pro Level
-
-Регистрироваться можно и с указанием аватарки. Для этого надо отправлять запрос вида:
-```http request
-POST /api/users/registration
-Content-Type: multipart/form-data; boundary=WebAppBoundary
-
---WebAppBoundary
-Content-Disposition: form-data; name="login"
-Content-Type: text/plain
-
-newbie
---WebAppBoundary
-Content-Disposition: form-data; name="pass"
-Content-Type: text/plain
-
-password
---WebAppBoundary
-Content-Disposition: form-data; name="name"
-Content-Type: text/plain
-
-Newbie
---WebAppBoundary
-Content-Disposition: form-data; name="file"; filename="image.png"
-
-< ./avatar.jpg
---WebAppBoundary--
-```
-
-Вот как в форму с картинкой добавить текстовые поля:
-
-```kotlin
-@Multipart
-@POST("users/registration")
-suspend fun registerWithPhoto(
-    @Part("login") login: RequestBody,
-    @Part("pass") pass: RequestBody,
-    @Part("name") name: RequestBody,
-    @Part media: MultipartBody.Part,
-): Response<ваш_тип>
-```
-
-Создание `RequestBody`:
-```kotlin
-login.toRequestBody("text/plain".toMediaType())
-```
-
-Создание файла — как в предыдущих примерах.
-
-### Результат
-
-Опубликуйте изменения в виде Pull Request в вашем проекте на GitHub.
-
-Результат пришлите ссылкой на PR GitHub-проект в личном кабинете студента на сайте [netology.ru](https://netology.ru).
+В качестве результата пришлите ссылку на PR GitHub-проект в личном кабинете студента на сайте [netology.ru](https://netology.ru).
