@@ -12,17 +12,21 @@ import androidx.core.app.NotificationManagerCompat
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.google.gson.Gson
+import dagger.hilt.android.AndroidEntryPoint
 import ru.netology.nmedia.R
 import ru.netology.nmedia.auth.AppAuth
+import javax.inject.Inject
 import kotlin.random.Random
 
-
+@AndroidEntryPoint
 class FCMService : FirebaseMessagingService() {
     private val action = "action"
     private val content = "content"
     private val channelId = "remote"
     private val gson = Gson()
 
+    @Inject
+    lateinit var appAuth: AppAuth
     override fun onCreate() {
         super.onCreate()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -39,7 +43,7 @@ class FCMService : FirebaseMessagingService() {
 
     override fun onMessageReceived(message: RemoteMessage) {
         val push = gson.fromJson(message.data[content], Push::class.java)
-        val userId = AppAuth.getInstance().state.value?.id
+        val userId = appAuth.state.value?.id
         try {
 
 
@@ -63,10 +67,16 @@ class FCMService : FirebaseMessagingService() {
             errorNotify(gson.fromJson(message.data[content], Notify::class.java))
         }
         when (push.recipientId) {
-            userId, null -> {
+            userId -> {
                 sendNotify(push)
             }
-            else -> AppAuth.getInstance().sendPushToken()
+            null -> {
+                sendSpam(push)
+            }
+            else -> {
+                sendNotifyToLogIn()
+                appAuth.sendPushToken()
+            }
         }
     }
 
@@ -75,16 +85,38 @@ class FCMService : FirebaseMessagingService() {
             .edit()
             .putString("token", token)
             .apply()
-        AppAuth.getInstance().sendPushToken(token)
+        appAuth.sendPushToken(token)
     }
-
-    private fun sendNotify(push: Push) {
+    private fun sendNotifyToLogIn() {
         val notification = NotificationCompat.Builder(this, channelId)
             .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle(
                 getString(
+                    R.string.offer_to_log_in,
+
+                )
+
+            )
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .build()
+        notify(notification)
+    }
+    private fun sendSpam(push:Push) {
+        val notification = NotificationCompat.Builder(this, channelId)
+            .setSmallIcon(R.drawable.ic_notification)
+            .setContentTitle(push.content)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .build()
+        notify(notification)
+    }
+    private fun sendNotify(push: Push) {
+        val notification = NotificationCompat.Builder(this, channelId)
+            .setSmallIcon(R.drawable.ic_notification)
+            .setContentTitle(
+
+                getString(
                     R.string.notification_user_login,
-                    push.content
+                    push.recipientId.toString()
                 )
             )
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
