@@ -10,7 +10,7 @@ import androidx.paging.PagingDataAdapter
 
 
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.ListAdapter
+
 import androidx.recyclerview.widget.RecyclerView
 import ru.netology.nmedia.R
 import ru.netology.nmedia.databinding.CardPostBinding
@@ -69,12 +69,13 @@ class PostViewHolder(
             } else {
                 postImage.visibility = View.GONE
             }
-            if (!post.saved) {
-                published.setText(R.string.waiting)
-                like.visibility = View.INVISIBLE
-            } else {
-                like.visibility = View.VISIBLE
-            }
+            // отключил для отображения кнопи лайка
+//            if (!post.saved) {
+//                published.setText(R.string.waiting)
+//                like.visibility = View.INVISIBLE
+//            } else {
+//                like.visibility = View.VISIBLE
+//            }
 
             menu.isVisible = post.ownedByMe
             menu.setOnClickListener {
@@ -100,6 +101,7 @@ class PostViewHolder(
             like.setOnClickListener {
                 like.isCheckable = true
                 like.isChecked = post.likedByMe
+
                 onInteractionListener.onLike(post)
             }
 
