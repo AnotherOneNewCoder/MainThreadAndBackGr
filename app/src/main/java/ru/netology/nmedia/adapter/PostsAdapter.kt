@@ -6,10 +6,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupMenu
 import androidx.core.view.isVisible
+import androidx.paging.PagingDataAdapter
 
 
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.ListAdapter
+
 import androidx.recyclerview.widget.RecyclerView
 import ru.netology.nmedia.R
 import ru.netology.nmedia.databinding.CardPostBinding
@@ -29,14 +30,14 @@ interface OnInteractionListener {
 
 class PostsAdapter(
     private val onInteractionListener: OnInteractionListener,
-) : ListAdapter<Post, PostViewHolder>(PostDiffCallback()) {
+) : PagingDataAdapter<Post, PostViewHolder>(PostDiffCallback()) {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostViewHolder {
         val binding = CardPostBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return PostViewHolder(binding, onInteractionListener)
     }
 
     override fun onBindViewHolder(holder: PostViewHolder, position: Int) {
-        val post = getItem(position)
+        val post = getItem(position) ?: return
         holder.bind(post)
     }
 }
@@ -68,12 +69,13 @@ class PostViewHolder(
             } else {
                 postImage.visibility = View.GONE
             }
-            if (!post.saved) {
-                published.setText(R.string.waiting)
-                like.visibility = View.INVISIBLE
-            } else {
-                like.visibility = View.VISIBLE
-            }
+            // отключил для отображения кнопи лайка
+//            if (!post.saved) {
+//                published.setText(R.string.waiting)
+//                like.visibility = View.INVISIBLE
+//            } else {
+//                like.visibility = View.VISIBLE
+//            }
 
             menu.isVisible = post.ownedByMe
             menu.setOnClickListener {
@@ -99,6 +101,7 @@ class PostViewHolder(
             like.setOnClickListener {
                 like.isCheckable = true
                 like.isChecked = post.likedByMe
+
                 onInteractionListener.onLike(post)
             }
 

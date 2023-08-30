@@ -3,9 +3,7 @@ buildscript {
     ext.kotlin_version = "1.8.21"
     ext.android_gradle_version = "7.4.2"
     ext.hilt_version = "2.47"
-//    dependencies {
-//        classpath "com.google.dagger:hilt-android-gradle-plugin:$hilt_version"
-//    }
+
 }
 
 plugins {

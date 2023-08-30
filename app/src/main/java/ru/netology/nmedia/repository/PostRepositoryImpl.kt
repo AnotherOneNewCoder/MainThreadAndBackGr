@@ -6,6 +6,9 @@ package ru.netology.nmedia.repository
 
 
 import androidx.lifecycle.*
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingSource
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import okhttp3.MultipartBody
@@ -32,9 +35,21 @@ class PostRepositoryImpl @Inject constructor(
     private val apiService: PostApiService
 ) : PostRepository {
 
-    override val data = dao.getAllVisible()
+    // before paging and done it in order to newCount could work
+    // пришлось создать для работы newCount
+    override val dataForNewCountPosts = dao.getAllVisible()
         .map(List<PostEntity>::toDto)
         .flowOn(Dispatchers.Default)
+
+
+    override val data = Pager(
+        config = PagingConfig(
+            pageSize = 10,
+            enablePlaceholders = false,
+        ), pagingSourceFactory = {
+            PostPagingSource(apiService)
+        }
+    ).flow
 
     override suspend fun getAll() {
         try {
