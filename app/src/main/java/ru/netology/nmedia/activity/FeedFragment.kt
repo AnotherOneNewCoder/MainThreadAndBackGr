@@ -181,7 +181,7 @@ class FeedFragment : Fragment() {
                     newPosts.visibility = View.VISIBLE
                     newPosts.text = "New posts: " + it.toString()
                     newPosts.setOnClickListener {
-                        viewModel.getAllUnhide()
+                        //viewModel.getAllUnhide()
                         //viewModel.loadPosts()
                         adapter.refresh()
                         newPosts.visibility = View.INVISIBLE

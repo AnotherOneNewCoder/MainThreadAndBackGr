@@ -57,8 +57,9 @@ class PostViewHolder(
             content.text = post.content
             avatar.load(pathToAvatarImage)
             // в адаптере
+            like.isCheckable = true
+            like.isChecked = post.likedByMe
             like.isCheckable = false
-            //like.isChecked = post.likedByMe
             like.text = "${post.likes}"
             if (post.attachment != null) {
                 postImage.visibility = View.VISIBLE
@@ -70,12 +71,12 @@ class PostViewHolder(
                 postImage.visibility = View.GONE
             }
             // отключил для отображения кнопи лайка
-//            if (!post.saved) {
-//                published.setText(R.string.waiting)
-//                like.visibility = View.INVISIBLE
-//            } else {
-//                like.visibility = View.VISIBLE
-//            }
+            if (!post.saved) {
+                published.setText(R.string.waiting)
+                like.visibility = View.INVISIBLE
+            } else {
+                like.visibility = View.VISIBLE
+            }
 
             menu.isVisible = post.ownedByMe
             menu.setOnClickListener {
@@ -99,8 +100,6 @@ class PostViewHolder(
             }
 
             like.setOnClickListener {
-                like.isCheckable = true
-                like.isChecked = post.likedByMe
 
                 onInteractionListener.onLike(post)
             }

@@ -101,7 +101,7 @@ class PostViewModel @Inject constructor(
     fun loadPosts() = viewModelScope.launch {
         try {
             _dataState.value = FeedModelState(loading = true)
-            repository.getAll()
+            //repository.getAll()
             _dataState.value = FeedModelState()
         } catch (e: Exception) {
             _dataState.value = FeedModelState(error = true)
@@ -109,16 +109,18 @@ class PostViewModel @Inject constructor(
 
     }
 
-    fun refreshPosts() = viewModelScope.launch {
-        try {
-            _dataState.value = FeedModelState(refreshing = true)
-            repository.getAllUnhide()
-            repository.getAll()
-            _dataState.value = FeedModelState()
-        } catch (e: Exception) {
-            _dataState.value = FeedModelState(error = true)
-        }
-    }
+
+    // больше эта функция не нужна
+//    fun refreshPosts() = viewModelScope.launch {
+//        try {
+//            _dataState.value = FeedModelState(refreshing = true)
+//            repository.getAllUnhide()
+//            repository.getAll()
+//            _dataState.value = FeedModelState()
+//        } catch (e: Exception) {
+//            _dataState.value = FeedModelState(error = true)
+//        }
+//    }
 
     fun save() {
         edited.value?.let {
