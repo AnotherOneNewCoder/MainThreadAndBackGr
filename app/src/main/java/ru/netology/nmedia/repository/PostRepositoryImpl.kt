@@ -6,9 +6,7 @@ package ru.netology.nmedia.repository
 
 
 import androidx.lifecycle.*
-import androidx.paging.Pager
-import androidx.paging.PagingConfig
-import androidx.paging.PagingSource
+import androidx.paging.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import okhttp3.MultipartBody
@@ -17,6 +15,8 @@ import okhttp3.RequestBody.Companion.asRequestBody
 
 import ru.netology.nmedia.api.*
 import ru.netology.nmedia.dao.PostDao
+import ru.netology.nmedia.dao.PostRemoteKeyDao
+import ru.netology.nmedia.db.AppDb
 import ru.netology.nmedia.dto.*
 import ru.netology.nmedia.entity.PostEntity
 import ru.netology.nmedia.entity.toDto
@@ -32,7 +32,9 @@ import javax.inject.Inject
 
 class PostRepositoryImpl @Inject constructor(
     private val dao: PostDao,
-    private val apiService: PostApiService
+    private val apiService: PostApiService,
+    postRemoteKeyDao: PostRemoteKeyDao,
+    appDb: AppDb,
 ) : PostRepository {
 
     // before paging and done it in order to newCount could work
@@ -41,15 +43,24 @@ class PostRepositoryImpl @Inject constructor(
         .map(List<PostEntity>::toDto)
         .flowOn(Dispatchers.Default)
 
-
-    override val data = Pager(
+    // возможно здесь нужно будет сделать saved = true
+    @OptIn(ExperimentalPagingApi::class)
+    override val data: Flow<PagingData<Post>> = Pager(
         config = PagingConfig(
             pageSize = 10,
+
             enablePlaceholders = false,
         ), pagingSourceFactory = {
-            PostPagingSource(apiService)
-        }
+            dao.getAllVisiblePagingSource()
+        },
+        remoteMediator = PostRemoteMediator(
+            api = apiService,
+            postDao = dao,
+            postRemoteKeyDao = postRemoteKeyDao,
+            appDb = appDb
+            )
     ).flow
+        .map { it.map(PostEntity::toDto)}
 
     override suspend fun getAll() {
         try {

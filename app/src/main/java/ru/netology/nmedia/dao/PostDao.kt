@@ -1,6 +1,7 @@
 package ru.netology.nmedia.dao
 
-import androidx.lifecycle.LiveData
+
+import androidx.paging.PagingSource
 import androidx.room.*
 import kotlinx.coroutines.flow.Flow
 import ru.netology.nmedia.dto.TypeAttachment
@@ -12,6 +13,9 @@ interface PostDao {
     fun getAll(): Flow<List<PostEntity>>
     @Query("SELECT * FROM PostEntity WHERE hidden = 0 ORDER BY id DESC")
     fun getAllVisible(): Flow<List<PostEntity>>
+
+    @Query("SELECT * FROM PostEntity WHERE hidden = 0 ORDER BY id DESC")
+    fun getAllVisiblePagingSource(): PagingSource<Int, PostEntity>
     @Query("SELECT COUNT(*) == 0 FROM PostEntity")
     suspend fun isEmpty(): Boolean
 
