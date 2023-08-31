@@ -110,7 +110,7 @@ class PostViewModel @Inject constructor(
     }
 
 
-    // больше эта функция не нужна
+    // больше эта функция не нужна v
 //    fun refreshPosts() = viewModelScope.launch {
 //        try {
 //            _dataState.value = FeedModelState(refreshing = true)
