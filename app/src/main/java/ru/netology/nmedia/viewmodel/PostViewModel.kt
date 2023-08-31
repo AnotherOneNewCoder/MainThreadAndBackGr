@@ -44,13 +44,6 @@ private val empty = Post(
     published = "",
     ownedByMe = false,
 )
-@HiltViewModel
-@ExperimentalCoroutinesApi
-class PostViewModel @Inject constructor(
-    private val repository: PostRepository,
-    auth: AppAuth
-) : ViewModel(){
-
 
 
 @HiltViewModel
