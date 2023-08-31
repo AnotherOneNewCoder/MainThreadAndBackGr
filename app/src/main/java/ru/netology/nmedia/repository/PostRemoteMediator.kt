@@ -1,16 +1,13 @@
 package ru.netology.nmedia.repository
-
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import androidx.room.withTransaction
-
 import ru.netology.nmedia.api.PostApiService
 import ru.netology.nmedia.dao.PostDao
 import ru.netology.nmedia.dao.PostRemoteKeyDao
 import ru.netology.nmedia.db.AppDb
-
 import ru.netology.nmedia.entity.PostEntity
 import ru.netology.nmedia.entity.PostRemoteKeyEntity
 import ru.netology.nmedia.error.ApiError
@@ -37,6 +34,11 @@ class PostRemoteMediator(
                     if (max != null) {
                         api.getAfter(max, state.config.pageSize)
                     } else {
+//                        api.getLatest(state.lastItemOrNull()?.id!!.toInt())
+                        //api.getLatest(state.config.jumpThreshold)
+//                        val max = Int.MAX_VALUE
+//                        api.getLatest(max)
+                        // все равно этот метод только 30 новых постов покажет, а не все
                         api.getLatest(state.config.pageSize)
                     }
                 }

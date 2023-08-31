@@ -26,7 +26,9 @@ import ru.netology.nmedia.R
 import ru.netology.nmedia.activity.NewPostFragment.Companion.textArg
 
 import ru.netology.nmedia.adapter.OnInteractionListener
+import ru.netology.nmedia.adapter.PostLoadingStateAdapter
 import ru.netology.nmedia.adapter.PostsAdapter
+import ru.netology.nmedia.dao.PostRemoteKeyDao
 import ru.netology.nmedia.databinding.FragmentFeedBinding
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.util.RetryTypes
@@ -40,13 +42,14 @@ class FeedFragment : Fragment() {
     private val viewModel: PostViewModel by activityViewModels()
     private val authViewModel by viewModels<AuthViewModel>()
 
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         val binding = FragmentFeedBinding.inflate(inflater, container, false)
-
+        val postRemoteKeyDao: PostRemoteKeyDao
 //        authViewModel.data.observe(viewLifecycleOwner)
 //        {
 //            val authenticated = authViewModel.isAuthenticated
@@ -118,7 +121,10 @@ class FeedFragment : Fragment() {
             }
         })
 
-        binding.list.adapter = adapter
+        binding.list.adapter = adapter.withLoadStateHeaderAndFooter(
+            header = PostLoadingStateAdapter{adapter.retry()},
+            footer = PostLoadingStateAdapter{adapter.retry()},
+        )
 
         lifecycleScope.launchWhenCreated {
             viewModel.data.collectLatest {
@@ -183,6 +189,7 @@ class FeedFragment : Fragment() {
                     newPosts.setOnClickListener {
                         //viewModel.getAllUnhide()
                         //viewModel.loadPosts()
+                        viewModel.clearPostRemoteKeyDao()
                         adapter.refresh()
                         newPosts.visibility = View.INVISIBLE
 

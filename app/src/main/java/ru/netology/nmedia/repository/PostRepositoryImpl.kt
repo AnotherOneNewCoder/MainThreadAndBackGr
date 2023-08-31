@@ -28,12 +28,13 @@ import ru.netology.nmedia.error.UnknownError
 
 import java.io.IOException
 import javax.inject.Inject
+import kotlin.random.Random
 
 
 class PostRepositoryImpl @Inject constructor(
     private val dao: PostDao,
     private val apiService: PostApiService,
-    postRemoteKeyDao: PostRemoteKeyDao,
+    private val postRemoteKeyDao: PostRemoteKeyDao,
     appDb: AppDb,
 ) : PostRepository {
 
@@ -45,7 +46,7 @@ class PostRepositoryImpl @Inject constructor(
 
     // возможно здесь нужно будет сделать saved = true
     @OptIn(ExperimentalPagingApi::class)
-    override val data: Flow<PagingData<Post>> = Pager(
+    override val data: Flow<PagingData<FeedItem>> = Pager(
         config = PagingConfig(
             pageSize = 10,
 
@@ -60,7 +61,14 @@ class PostRepositoryImpl @Inject constructor(
             appDb = appDb
             )
     ).flow
-        .map { it.map(PostEntity::toDto)}
+        .map { 
+            it.map(PostEntity::toDto)
+                .insertSeparators { previous, next ->
+                    if(previous?.id?.rem(5) == 0L){
+                        Ad(Random.nextLong(), "figma.jpg")
+                    } else null
+                }
+        }
 
     override suspend fun getAll() {
         try {
@@ -232,6 +240,12 @@ override suspend fun uploadMedia(upload: MediaUpload): Media {
             dao.getAllUnhide()
         }
 
+    }
+
+    override fun cleanPostRemoteKeyDao() {
+        CoroutineScope(Dispatchers.Default).launch {
+            postRemoteKeyDao.clear()
+        }
     }
 
 

@@ -1,17 +1,17 @@
 package ru.netology.nmedia.repository
 
 
-import androidx.lifecycle.LiveData
+
 import androidx.paging.PagingData
 import kotlinx.coroutines.flow.Flow
+import ru.netology.nmedia.dto.FeedItem
 import ru.netology.nmedia.dto.Media
 import ru.netology.nmedia.dto.MediaUpload
 import ru.netology.nmedia.dto.Post
-import ru.netology.nmedia.model.FeedModel
-import java.io.File
+
 
 interface PostRepository {
-    val data: Flow<PagingData<Post>>
+    val data: Flow<PagingData<FeedItem>>
 
     // пришлось создать для работы newCount
     val dataForNewCountPosts: Flow<List<Post>>
@@ -27,4 +27,6 @@ interface PostRepository {
 
     suspend fun unlikeByID(id: Long)
     suspend fun getAllUnhide()
+
+    fun cleanPostRemoteKeyDao()
 }
