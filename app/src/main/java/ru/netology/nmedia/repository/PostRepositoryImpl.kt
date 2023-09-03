@@ -237,7 +237,8 @@ override suspend fun uploadMedia(upload: MediaUpload): Media {
     }
     override suspend fun getAllUnhide() {
         CoroutineScope(Dispatchers.Default).launch {
-            dao.getAllUnhide()
+            //dao.getAllUnhide()
+            dao.getAllUnhidePagingSource()
         }
 
     }

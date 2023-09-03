@@ -11,7 +11,9 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import androidx.paging.LoadState
@@ -22,6 +24,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import ru.netology.nmedia.R
 import ru.netology.nmedia.activity.NewPostFragment.Companion.textArg
 
@@ -122,8 +125,8 @@ class FeedFragment : Fragment() {
         })
 
         binding.list.adapter = adapter.withLoadStateHeaderAndFooter(
-            header = PostLoadingStateAdapter{adapter.retry()},
-            footer = PostLoadingStateAdapter{adapter.retry()},
+            header = PostLoadingStateAdapter { adapter.retry() },
+            footer = PostLoadingStateAdapter { adapter.retry() },
         )
 
         lifecycleScope.launchWhenCreated {
@@ -173,9 +176,6 @@ class FeedFragment : Fragment() {
 //            }
 
 
-
-
-
         binding.retryButton.setOnClickListener {
             //viewModel.loadPosts()
             adapter.refresh()
@@ -187,8 +187,9 @@ class FeedFragment : Fragment() {
                     newPosts.visibility = View.VISIBLE
                     newPosts.text = "New posts: " + it.toString()
                     newPosts.setOnClickListener {
-                        //viewModel.getAllUnhide()
+                        viewModel.getAllUnhide()
                         //viewModel.loadPosts()
+
                         viewModel.clearPostRemoteKeyDao()
                         adapter.refresh()
                         newPosts.visibility = View.INVISIBLE
@@ -209,13 +210,23 @@ class FeedFragment : Fragment() {
             }
         })
 
-        lifecycleScope.launchWhenCreated {
-            adapter.loadStateFlow.collectLatest {
-                binding.refresher.isRefreshing =
-                    it.refresh is LoadState.Loading || it.append is LoadState.Loading ||
-                            it.prepend is LoadState.Loading
+        // новый вариант псле вебинара
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                adapter.loadStateFlow.collectLatest { state ->
+                    binding.refresher.isRefreshing =
+                        state.refresh is LoadState.Loading
+                }
             }
         }
+        // вариант до вебинара
+//        lifecycleScope.launchWhenCreated {
+//            adapter.loadStateFlow.collectLatest {
+//                binding.refresher.isRefreshing =
+//                    it.refresh is LoadState.Loading || it.append is LoadState.Loading ||
+//                            it.prepend is LoadState.Loading
+//            }
+//        }
 
         binding.refresher.setColorSchemeResources(R.color.colorAccent)
         binding.refresher.setOnRefreshListener {

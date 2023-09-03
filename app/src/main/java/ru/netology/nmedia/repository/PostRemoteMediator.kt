@@ -72,6 +72,7 @@ class PostRemoteMediator(
                                     )
                                 )
                             )
+                            postDao.deleteAll()
                         }
                         else {
                             postRemoteKeyDao.insert(PostRemoteKeyEntity(
