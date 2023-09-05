@@ -15,8 +15,10 @@ import androidx.recyclerview.widget.RecyclerView
 import ru.netology.nmedia.BuildConfig
 import ru.netology.nmedia.R
 import ru.netology.nmedia.databinding.CardAdBinding
+import ru.netology.nmedia.databinding.CardDateBinding
 import ru.netology.nmedia.databinding.CardPostBinding
 import ru.netology.nmedia.dto.Ad
+import ru.netology.nmedia.dto.DateSeparator
 import ru.netology.nmedia.dto.FeedItem
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.handler.load
@@ -35,35 +37,62 @@ interface OnInteractionListener {
 class PostsAdapter(
     private val onInteractionListener: OnInteractionListener,
 ) : PagingDataAdapter<FeedItem, RecyclerView.ViewHolder>(PostDiffCallback()) {
-
+    private val typeAd = 0
+    private val typePost = 1
+    private val typeDate = 2
     override fun getItemViewType(position: Int): Int =
         when (getItem(position)) {
-            is Ad -> R.layout.card_ad
-            is Post -> R.layout.card_post
+            is Ad -> typeAd
+            is Post -> typePost
+            is DateSeparator -> typeDate
             null -> error("unknown item type")
         }
 
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder =
-        when (viewType) {
-            R.layout.card_post -> {
-                val binding =
-                    CardPostBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-                PostViewHolder(binding, onInteractionListener)
-            }
-            R.layout.card_ad -> {
-                val binding =
-                    CardAdBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-                AdViewHolder(binding)
-            }
-            else -> error("unknow view type: $viewType")
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+        val layoutInflater = LayoutInflater.from(parent.context)
+        return when (viewType) {
+            typeAd -> AdViewHolder(
+                CardAdBinding.inflate(layoutInflater, parent, false),
+
+            )
+
+            typePost -> PostViewHolder(
+                CardPostBinding.inflate(layoutInflater, parent, false),
+                onInteractionListener
+            )
+
+            typeDate -> DateViewHolder(
+                CardDateBinding.inflate(layoutInflater, parent, false),
+            )
+
+            else -> throw IllegalArgumentException("unknown view type: $viewType")
         }
+    }
+//        when (viewType) {
+//            R.layout.card_post -> {
+//                val binding =
+//                    CardPostBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+//                PostViewHolder(binding, onInteractionListener)
+//            }
+//            R.layout.card_ad -> {
+//                val binding =
+//                    CardAdBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+//                AdViewHolder(binding)
+//            }
+//            R.layout.card_date -> {
+//                val binding = CardDateBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+//                DateViewHolder(binding)
+//            }
+//            else -> error("unknow view type: $viewType")
+//        }
 
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when(val item = getItem(position)) {
             is Ad -> (holder as? AdViewHolder)?.bind(item)
             is Post -> (holder as? PostViewHolder)?.bind(item)
+            is DateSeparator -> (holder as? DateViewHolder)?.bind(item)
             null -> error("unknown item type")
         }
     }
@@ -91,7 +120,7 @@ class PostViewHolder(
             val pathToAvatarImage = "${BuildConfig.BASE_URL}/avatars/${post.authorAvatar}"
             val pathToAttachmentImage = "${BuildConfig.BASE_URL}/media/${post.attachment?.url}"
             author.text = post.author
-            published.text = post.published
+            published.text = post.published.toString()
             content.text = post.content
             avatar.load(pathToAvatarImage)
             // в адаптере
@@ -155,7 +184,18 @@ class PostViewHolder(
     }
 
 }
-
+class DateViewHolder(
+    private val binding: CardDateBinding
+): RecyclerView.ViewHolder(binding.root) {
+    fun bind(date: DateSeparator) {
+        val source = when(date.type) {
+            DateSeparator.Type.TODAY -> R.string.today
+            DateSeparator.Type.YESTERDAY -> R.string.yesterday
+            DateSeparator.Type.WEEK_AGO -> R.string.week_ago
+        }
+        binding.root.setText(source)
+    }
+}
 class PostDiffCallback : DiffUtil.ItemCallback<FeedItem>() {
     override fun areItemsTheSame(oldItem: FeedItem, newItem: FeedItem): Boolean {
         if (oldItem::class != newItem::class) {

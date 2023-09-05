@@ -185,7 +185,7 @@ class FeedFragment : Fragment() {
             if (it > 0) {
                 binding.apply {
                     newPosts.visibility = View.VISIBLE
-                    newPosts.text = "New posts: " + it.toString()
+                    newPosts.text = "New posts: $it"
                     newPosts.setOnClickListener {
                         viewModel.getAllUnhide()
                         //viewModel.loadPosts()
@@ -231,6 +231,7 @@ class FeedFragment : Fragment() {
         binding.refresher.setColorSchemeResources(R.color.colorAccent)
         binding.refresher.setOnRefreshListener {
             //viewModel.refreshPosts()
+            viewModel.getAllUnhide()
             adapter.refresh()
         }
 

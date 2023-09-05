@@ -52,5 +52,8 @@
     <string name="error_notification_title">Вы используете старую версию приложения</string>
     <string name="notification_user_login">Пользователь зашел под id с номером %1$s</string>
     <string name="offer_to_log_in">Возможно у вас есть новые уведомления, зайдите в приложение</string>
+    <string name="today">Сегодня</string>
+    <string name="yesterday">Вчера</string>
+    <string name="week_ago">Неделю назад</string>
 
 </resources>

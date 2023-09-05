@@ -3,15 +3,21 @@ package ru.netology.nmedia.repository
 
 
 import androidx.paging.PagingData
+import androidx.paging.PagingSource
 import kotlinx.coroutines.flow.Flow
 import ru.netology.nmedia.dto.FeedItem
 import ru.netology.nmedia.dto.Media
 import ru.netology.nmedia.dto.MediaUpload
 import ru.netology.nmedia.dto.Post
+import ru.netology.nmedia.entity.PostEntity
 
 
 interface PostRepository {
-    val data: Flow<PagingData<FeedItem>>
+    // по лекциям у нас data выглядит такой, однако, в готовом коде все иначе...
+    //val data: Flow<PagingData<FeedItem>>
+
+    //так выглядит дата в лецкиях
+    val data: Flow<PagingData<Post>>
 
     // пришлось создать для работы newCount
     val dataForNewCountPosts: Flow<List<Post>>
@@ -29,4 +35,5 @@ interface PostRepository {
     suspend fun getAllUnhide()
 
     fun cleanPostRemoteKeyDao()
+
 }

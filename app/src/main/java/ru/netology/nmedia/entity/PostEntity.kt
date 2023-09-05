@@ -6,6 +6,9 @@ import androidx.room.PrimaryKey
 import ru.netology.nmedia.dto.Attachments
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.dto.TypeAttachment
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneId
 
 @Entity
 data class PostEntity(
@@ -15,7 +18,7 @@ data class PostEntity(
     val author: String,
     val authorAvatar: String,
     val content: String,
-    val published: String,
+    val published: Long,
     val likedByMe: Boolean,
     val likes: Int = 0,
     val saved: Boolean,
@@ -25,11 +28,12 @@ data class PostEntity(
     val attachments: AttachmentEmbeddable?
 
 ) {
-    fun toDto() = Post(id, authorId ,author,authorAvatar ,content, published, likedByMe, likes, saved, attachments?.toDto())
+    fun toDto() = Post(id, authorId ,author,authorAvatar ,content, LocalDateTime.ofInstant(Instant.ofEpochSecond(published), ZoneId.systemDefault()), likedByMe, likes, saved, attachments?.toDto())
 
     companion object {
         fun fromDto(dto: Post) =
-            PostEntity(dto.id, dto.authorId ,dto.author,dto.authorAvatar, dto.content, dto.published, dto.likedByMe, dto.likes, dto.saved, false, AttachmentEmbeddable.fromDto(dto.attachment) )
+            PostEntity(dto.id, dto.authorId ,dto.author,dto.authorAvatar, dto.content, dto.published.atZone(
+                ZoneId.systemDefault()).toEpochSecond(), dto.likedByMe, dto.likes, dto.saved, false, AttachmentEmbeddable.fromDto(dto.attachment) )
 
     }
 }

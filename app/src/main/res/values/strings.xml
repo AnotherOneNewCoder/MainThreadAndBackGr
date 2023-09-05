@@ -51,5 +51,8 @@
     <string name="login_enter">login_enter</string>
     <string name="login_dialog">\"Only for authorized users. Would like to visit authorization widget? \"</string>
     <string name="offer_to_log_in">Возможно у вас есть новые уведомления, зайдите в приложение</string>
+    <string name="today">today</string>
+    <string name="yesterday">yesterday</string>
+    <string name="week_ago">week ago</string>
 
 </resources>
