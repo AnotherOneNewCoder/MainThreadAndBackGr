@@ -39,9 +39,11 @@ private val empty = Post(
 private val today = LocalDateTime.now()
 
 private val yesterday = today.minusDays(1)
+//private val yesterday = today.minusSeconds(2)
 
 
 private val weekAgo = today.minusDays(2)
+//private val weekAgo = today.minusSeconds(4)
 
 fun Post?.isToday(): Boolean {
     if (this == null) return false
@@ -52,12 +54,14 @@ fun Post?.isToday(): Boolean {
 fun Post?.isYesterday(): Boolean {
     if (this == null) return false
     return today.year == published.year && published.dayOfYear == yesterday.dayOfYear
+    //return published.second == yesterday.second
 
 }
 
 fun Post?.isWeekAgo(): Boolean {
     if (this == null) return false
     return published < weekAgo
+    //return published.second == weekAgo.second
 }
 
 @HiltViewModel
@@ -104,34 +108,31 @@ class PostViewModel @Inject constructor(
 //            }
 //        )
 //    }
-    private fun insertDateSeparators(before: Post?, after: Post?): DateSeparator? {
-        return when {
-            before == null && after.isToday() -> {
-                DateSeparator(DateSeparator.Type.TODAY)
-            }
-
-            (before == null && after.isYesterday()) || (before.isToday() && after.isYesterday()) -> {
-                DateSeparator(DateSeparator.Type.YESTERDAY)
-            }
-
-            before.isYesterday() && after.isWeekAgo() -> {
-                DateSeparator(DateSeparator.Type.WEEK_AGO)
-            }
-
-
-            else -> {
-                null
-            }
-        }
-    }
+//    private fun insertDateSeparators(before: Post?, after: Post?): DateSeparator? {
+//        return when {
+//            before == null && after.isToday() -> {
+//                DateSeparator(DateSeparator.Type.TODAY)
+//            }
+//
+//            (before == null && after.isYesterday()) || (before.isToday() && after.isYesterday()) -> {
+//                DateSeparator(DateSeparator.Type.YESTERDAY)
+//            }
+//
+//            before.isYesterday() && after.isWeekAgo() -> {
+//                DateSeparator(DateSeparator.Type.WEEK_AGO)
+//            }
+//
+//
+//            else -> {
+//                null
+//            }
+//        }
+//    }
 
     private fun insertFeedSeparators(before: Post?, after: Post?): FeedItem? {
         return when {
 
-            (before?.id?.rem(5) == 0L) -> {
-                Ad(Random.nextLong(), "figma.jpg")
 
-            }
 
             before == null && after.isToday() -> {
                 DateSeparator(DateSeparator.Type.TODAY)
@@ -144,6 +145,10 @@ class PostViewModel @Inject constructor(
 
             before.isYesterday() && after.isWeekAgo() -> {
                 DateSeparator(DateSeparator.Type.WEEK_AGO)
+            }
+            (before?.id?.rem(5) == 0L) -> {
+                Ad(Random.nextLong(), "figma.jpg")
+
             }
 
 

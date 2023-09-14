@@ -5,8 +5,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-
-
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -17,21 +15,21 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import androidx.paging.LoadState
-import androidx.recyclerview.widget.RecyclerView
+
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChangedBy
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import ru.netology.nmedia.R
 import ru.netology.nmedia.activity.NewPostFragment.Companion.textArg
-
 import ru.netology.nmedia.adapter.OnInteractionListener
 import ru.netology.nmedia.adapter.PostLoadingStateAdapter
 import ru.netology.nmedia.adapter.PostsAdapter
-import ru.netology.nmedia.dao.PostRemoteKeyDao
+
 import ru.netology.nmedia.databinding.FragmentFeedBinding
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.util.RetryTypes
@@ -52,7 +50,7 @@ class FeedFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         val binding = FragmentFeedBinding.inflate(inflater, container, false)
-        val postRemoteKeyDao: PostRemoteKeyDao
+        //val postRemoteKeyDao: PostRemoteKeyDao
 //        authViewModel.data.observe(viewLifecycleOwner)
 //        {
 //            val authenticated = authViewModel.isAuthenticated
@@ -123,6 +121,22 @@ class FeedFragment : Fragment() {
                 }
             }
         })
+        fun scrolltoTop() {
+            lifecycleScope.launch {
+                val scrollingTop = adapter
+                    .loadStateFlow
+                    .distinctUntilChangedBy {
+                        it.source.refresh
+                    }
+                    .map {
+                        it.source.refresh is LoadState.NotLoading
+                    }
+
+                scrollingTop.collectLatest { scrolling ->
+                    if (scrolling) binding.list.scrollToPosition(0)
+                }
+            }
+        }
 
         binding.list.adapter = adapter.withLoadStateHeaderAndFooter(
             header = PostLoadingStateAdapter { adapter.retry() },
@@ -167,6 +181,7 @@ class FeedFragment : Fragment() {
         }
         authViewModel.data.observe(viewLifecycleOwner) {
             adapter.refresh()
+            scrolltoTop()
         }
 
         // before paging
@@ -193,6 +208,7 @@ class FeedFragment : Fragment() {
                         viewModel.clearPostRemoteKeyDao()
                         adapter.refresh()
                         newPosts.visibility = View.INVISIBLE
+                        scrolltoTop()
 
                     }
 
@@ -201,14 +217,15 @@ class FeedFragment : Fragment() {
                 binding.newPosts.visibility = View.INVISIBLE
             }
         }
-        adapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
-            override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
-                if (positionStart == 0) {
-                    binding.list.smoothScrollToPosition(0)
-
-                }
-            }
-        })
+        // отключил автоскролл
+//        adapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
+//            override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
+//                if (positionStart == 0) {
+//                    binding.list.smoothScrollToPosition(0)
+//
+//                }
+//            }
+//        })
 
         // новый вариант псле вебинара
         viewLifecycleOwner.lifecycleScope.launch {
@@ -233,6 +250,7 @@ class FeedFragment : Fragment() {
             //viewModel.refreshPosts()
             viewModel.getAllUnhide()
             adapter.refresh()
+            scrolltoTop()
         }
 
         binding.fab.setOnClickListener {
@@ -249,7 +267,10 @@ class FeedFragment : Fragment() {
             }
         }
 
+
+
 //        }
+
         return binding.root
     }
 }

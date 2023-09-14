@@ -45,7 +45,8 @@ class PostsAdapter(
             is Ad -> typeAd
             is Post -> typePost
             is DateSeparator -> typeDate
-            null -> error("unknown item type")
+            // иногда на этом месте приходит -1 и выбрасывается ошибка, но я ее не могу поймать
+            null -> error("unknown item type ${getItemId(position)}")
         }
 
 
