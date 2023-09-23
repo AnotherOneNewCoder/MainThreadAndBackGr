@@ -5,12 +5,10 @@ import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import androidx.room.withTransaction
-
 import ru.netology.nmedia.api.PostApiService
 import ru.netology.nmedia.dao.PostDao
 import ru.netology.nmedia.dao.PostRemoteKeyDao
 import ru.netology.nmedia.db.AppDb
-
 import ru.netology.nmedia.entity.PostEntity
 import ru.netology.nmedia.entity.PostRemoteKeyEntity
 import ru.netology.nmedia.error.ApiError
@@ -37,56 +35,89 @@ class PostRemoteMediator(
                     if (max != null) {
                         api.getAfter(max, state.config.pageSize)
                     } else {
+//                        api.getLatest(state.lastItemOrNull()?.id!!.toInt())
+                        //api.getLatest(state.config.jumpThreshold)
+//                        val max = Int.MAX_VALUE
+//                        api.getLatest(max)
+                        // все равно этот метод только 30 новых постов покажет, а не все
                         api.getLatest(state.config.pageSize)
                     }
+//                    postRemoteKeyDao.max()?.let {
+//                        api.getAfter(it, state.config.pageSize)
+//                    } ?: api.getLatest(state.config.pageSize)
                 }
-                LoadType.PREPEND -> return MediatorResult.Success(true)
-
 
                 LoadType.APPEND -> {
                     val id = postRemoteKeyDao.min() ?: return MediatorResult.Success(false)
                     api.getBefore(id, state.config.pageSize)
+//                    return MediatorResult.Success(true)
                 }
+
+                LoadType.PREPEND -> return MediatorResult.Success(true)
 
             }
             if (!result.isSuccessful) {
                 throw ApiError(result.code(), result.message())
+            }
+            if (result.body().isNullOrEmpty()) {
+                return MediatorResult.Success(true)
             }
             val data = result.body() ?: throw ApiError(result.code(), result.message())
 
             appDb.withTransaction {
                 when (loadType) {
                     LoadType.REFRESH -> {
+//                        if (postRemoteKeyDao.isEmpty()) {
+//                            postRemoteKeyDao.insert(
+//                                listOf(
+//                                    PostRemoteKeyEntity(
+//                                        PostRemoteKeyEntity.KeyType.AFTER,
+//                                        data.first().id,
+//                                    ),
+//                                    PostRemoteKeyEntity(
+//                                        PostRemoteKeyEntity.KeyType.BEFORE,
+//                                        data.last().id,
+//                                    )
+//                                )
+//                            )
+//                            postDao.deleteAll()
+//                        } else {
+//                            postRemoteKeyDao.insert(
+//                                PostRemoteKeyEntity(
+//                                    PostRemoteKeyEntity.KeyType.AFTER,
+//                                    data.first().id,
+//                                )
+//                            )
+//                        }
+                        postRemoteKeyDao.insert(
+                            PostRemoteKeyEntity(
+                                PostRemoteKeyEntity.KeyType.AFTER,
+                                data.first().id
+                            )
+                        )
                         if (postRemoteKeyDao.isEmpty()) {
                             postRemoteKeyDao.insert(
-                                listOf(
-                                    PostRemoteKeyEntity(
-                                        PostRemoteKeyEntity.KeyType.AFTER,
-                                        data.first().id,
-                                    ),
-                                    PostRemoteKeyEntity(
-                                        PostRemoteKeyEntity.KeyType.BEFORE,
-                                        data.last().id,
-                                    )
+                                PostRemoteKeyEntity(
+                                    PostRemoteKeyEntity.KeyType.BEFORE,
+                                    data.last().id
                                 )
                             )
-                        }
-                        else {
-                            postRemoteKeyDao.insert(PostRemoteKeyEntity(
-                                PostRemoteKeyEntity.KeyType.AFTER,
-                                data.first().id,
-                            ))
                         }
                     }
 
                     LoadType.APPEND -> {
-                        postRemoteKeyDao.insert(
-                            PostRemoteKeyEntity(
-                                PostRemoteKeyEntity.KeyType.BEFORE,
-                                data.last().id,
+//                        if (data.last().id != null) {
+                            postRemoteKeyDao.insert(
+                                PostRemoteKeyEntity(
+                                    PostRemoteKeyEntity.KeyType.BEFORE,
+                                    data.last().id,
+                                ),
+
                             )
-                        )
+//                        } else
+//                            return@withTransaction
                     }
+
                     else -> Unit
                 }
 

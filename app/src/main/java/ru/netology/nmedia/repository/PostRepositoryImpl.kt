@@ -28,12 +28,13 @@ import ru.netology.nmedia.error.UnknownError
 
 import java.io.IOException
 import javax.inject.Inject
+import kotlin.random.Random
 
 
 class PostRepositoryImpl @Inject constructor(
     private val dao: PostDao,
     private val apiService: PostApiService,
-    postRemoteKeyDao: PostRemoteKeyDao,
+    private val postRemoteKeyDao: PostRemoteKeyDao,
     appDb: AppDb,
 ) : PostRepository {
 
@@ -44,23 +45,49 @@ class PostRepositoryImpl @Inject constructor(
         .flowOn(Dispatchers.Default)
 
     // возможно здесь нужно будет сделать saved = true
+    // перепишу иначе не работает сепаратор во viewmodel
+//    @OptIn(ExperimentalPagingApi::class)
+//    override val data: Flow<PagingData<FeedItem>> = Pager(
+//        config = PagingConfig(
+//            pageSize = 10,
+//
+//            enablePlaceholders = false,
+//        ), pagingSourceFactory = {
+//            dao.getAllVisiblePagingSource()
+//        },
+//        remoteMediator = PostRemoteMediator(
+//            api = apiService,
+//            postDao = dao,
+//            postRemoteKeyDao = postRemoteKeyDao,
+//            appDb = appDb
+//            )
+//    ).flow
+//        // в лекциях мы добавляем сепарот с рекламой здесь, а в готовом коде здесь ничего нет, а разделитель реализован в PostViewModel....
+//        .map {
+//            it.map(PostEntity::toDto)
+//                .insertSeparators { previous, next ->
+//                    if(previous?.id?.rem(5) == 0L){
+//                        Ad(Random.nextLong(), "figma.jpg")
+//                    } else null
+//                }
+//
+//        }
+    // переписал как в готовом коде +-
     @OptIn(ExperimentalPagingApi::class)
     override val data: Flow<PagingData<Post>> = Pager(
-        config = PagingConfig(
-            pageSize = 10,
-
-            enablePlaceholders = false,
-        ), pagingSourceFactory = {
-            dao.getAllVisiblePagingSource()
-        },
+        config = PagingConfig(pageSize = 5),
         remoteMediator = PostRemoteMediator(
             api = apiService,
             postDao = dao,
             postRemoteKeyDao = postRemoteKeyDao,
             appDb = appDb
-            )
-    ).flow
-        .map { it.map(PostEntity::toDto)}
+            ),
+        pagingSourceFactory = { dao.getAllVisiblePagingSource() },
+    ).flow.map { pagingData ->
+        pagingData.map(PostEntity::toDto)
+    }
+
+
 
     override suspend fun getAll() {
         try {
@@ -229,9 +256,16 @@ override suspend fun uploadMedia(upload: MediaUpload): Media {
     }
     override suspend fun getAllUnhide() {
         CoroutineScope(Dispatchers.Default).launch {
-            dao.getAllUnhide()
+            //dao.getAllUnhide()
+            dao.getAllUnhidePagingSource()
         }
 
+    }
+
+    override fun cleanPostRemoteKeyDao() {
+        CoroutineScope(Dispatchers.Default).launch {
+            postRemoteKeyDao.clear()
+        }
     }
 
 

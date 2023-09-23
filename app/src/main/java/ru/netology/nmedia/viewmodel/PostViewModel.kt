@@ -4,16 +4,14 @@ package ru.netology.nmedia.viewmodel
 import android.net.Uri
 import androidx.lifecycle.*
 import androidx.lifecycle.switchMap
-import androidx.paging.PagingData
-import androidx.paging.map
+import androidx.paging.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import ru.netology.nmedia.auth.AppAuth
-import ru.netology.nmedia.dto.MediaUpload
-import ru.netology.nmedia.dto.Post
+import ru.netology.nmedia.dto.*
 import ru.netology.nmedia.model.FeedModel
 import ru.netology.nmedia.model.FeedModelState
 import ru.netology.nmedia.model.PhotoModel
@@ -21,7 +19,9 @@ import ru.netology.nmedia.repository.*
 import ru.netology.nmedia.util.RetryTypes
 import ru.netology.nmedia.util.SingleLiveEvent
 import java.io.File
+import java.time.LocalDateTime
 import javax.inject.Inject
+import kotlin.random.Random
 
 
 private val empty = Post(
@@ -32,9 +32,37 @@ private val empty = Post(
     authorAvatar = "",
     likedByMe = false,
     likes = 0,
-    published = "",
+    published = LocalDateTime.now(),
     ownedByMe = false,
 )
+
+private val today = LocalDateTime.now()
+
+private val yesterday = today.minusDays(1)
+//private val yesterday = today.minusSeconds(2)
+
+
+private val weekAgo = today.minusDays(2)
+//private val weekAgo = today.minusSeconds(4)
+
+fun Post?.isToday(): Boolean {
+    if (this == null) return false
+    return published > yesterday
+
+}
+
+fun Post?.isYesterday(): Boolean {
+    if (this == null) return false
+    return today.year == published.year && published.dayOfYear == yesterday.dayOfYear
+    //return published.second == yesterday.second
+
+}
+
+fun Post?.isWeekAgo(): Boolean {
+    if (this == null) return false
+    return published < weekAgo
+    //return published.second == weekAgo.second
+}
 
 @HiltViewModel
 @ExperimentalCoroutinesApi
@@ -42,16 +70,130 @@ class PostViewModel @Inject constructor(
     private val repository: PostRepository,
     auth: AppAuth
 ) : ViewModel() {
+    //    private val dateseparatorterminal: TerminalSeparatorType =
+//        TerminalSeparatorType()
+    private val cached: Flow<PagingData<FeedItem>> = repository
+        .data
+        .map { pagingData ->
+            pagingData.insertSeparators(
+                terminalSeparatorType = TerminalSeparatorType.SOURCE_COMPLETE,
+                //generator = ::insertDateSeparators
+                generator = ::insertFeedSeparators
+            )
+//            pagingData.insertSeparators(
+//                generator = { before, after ->
+//                    if (before?.id?.rem(5) != 0L) null else
+//                        Ad(Random.nextLong(),
+//                        "figma.jpg")
+//                }
+//            )
+        }
+        .cachedIn(viewModelScope)
+
+    //    private val cached: Flow<PagingData<FeedItem>> = repository
+//        .data
+//        .map {
+//        pagingData: PagingData<Post> ->
+//        pagingData.insertSeparators(
+//            generator = { before: Post?, after: Post? ->
+//                if (before == null && before.isToday()) {
+//                        DateSeparator(DateSeparator.Type.TODAY)
+//                    } else if (before == null || (before.isToday() && after.isYesterday())) {
+//                    DateSeparator(DateSeparator.Type.YESTERDAY)
+//                } else if ((before.isYesterday() && after.isWeekAgo())) {
+//                    DateSeparator(DateSeparator.Type.WEEK_AGO)
+//                } else {
+//                    null
+//                }
+//            }
+//        )
+//    }
+//    private fun insertDateSeparators(before: Post?, after: Post?): DateSeparator? {
+//        return when {
+//            before == null && after.isToday() -> {
+//                DateSeparator(DateSeparator.Type.TODAY)
+//            }
+//
+//            (before == null && after.isYesterday()) || (before.isToday() && after.isYesterday()) -> {
+//                DateSeparator(DateSeparator.Type.YESTERDAY)
+//            }
+//
+//            before.isYesterday() && after.isWeekAgo() -> {
+//                DateSeparator(DateSeparator.Type.WEEK_AGO)
+//            }
+//
+//
+//            else -> {
+//                null
+//            }
+//        }
+//    }
+
+    private fun insertFeedSeparators(before: Post?, after: Post?): FeedItem? {
+        return when {
 
 
-    val data: Flow<PagingData<Post>> = auth.state.flatMapLatest { token ->
-        repository.data
-            .map { posts ->
-                posts.map {
-                    it.copy(ownedByMe = it.authorId == token?.id)
-                }
+
+            before == null && after.isToday() -> {
+                DateSeparator(DateSeparator.Type.TODAY)
             }
-    }.flowOn(Dispatchers.Default)
+
+            (before == null && after.isYesterday()) || (before.isToday() && after.isYesterday()) -> {
+                DateSeparator(DateSeparator.Type.YESTERDAY)
+            }
+
+
+            before.isYesterday() && after.isWeekAgo() -> {
+                DateSeparator(DateSeparator.Type.WEEK_AGO)
+            }
+            (before?.id?.rem(5) == 0L) -> {
+                Ad(Random.nextLong(), "figma.jpg")
+
+            }
+
+
+
+
+            else -> {
+                null
+            }
+        }
+    }
+
+
+    //    val data: Flow<PagingData<FeedItem>> = auth.state.flatMapLatest { token ->
+//        repository.data
+//            .map { posts ->
+//                posts.map { post ->
+//                    if (post is Post) {
+//                        post.copy(ownedByMe = post.authorId == token?.id)
+//                    } else {
+//                        post
+//                    }
+//                }
+//            }
+//    }.flowOn(Dispatchers.Default)
+//    val data: Flow<PagingData<FeedItem>> = auth.state
+//        .flatMapLatest { (myId, _) ->
+//            cached
+//                .map { pagingData ->
+//                pagingData.map { item ->
+//                    if (item !is Post) item else item.copy(ownedByMe = item.authorId == myId)
+//                }
+//            }
+//        }
+
+    // переписал из лекции
+    val data: Flow<PagingData<FeedItem>> = auth
+        .state
+        .flatMapLatest { value: Token? ->
+            cached
+                .map { pagingData ->
+                    pagingData.map { item ->
+                        if (item !is Post) item else item.copy(ownedByMe = item.authorId == value?.id)
+                    }
+                }
+        }
 
     private val _dataState = MutableLiveData<FeedModelState>()
     val dataState: LiveData<FeedModelState>
@@ -90,9 +232,6 @@ class PostViewModel @Inject constructor(
         loadPosts()
     }
 
-    fun setPhoto(photoModel: PhotoModel) {
-        _photo.value = photoModel
-    }
 
     fun clearPhoto() {
         _photo.value = null
@@ -107,6 +246,16 @@ class PostViewModel @Inject constructor(
             _dataState.value = FeedModelState(error = true)
         }
 
+    }
+
+    fun clearPostRemoteKeyDao() = viewModelScope.launch {
+        try {
+            _dataState.value = FeedModelState(loading = true)
+            repository.cleanPostRemoteKeyDao()
+            _dataState.value = FeedModelState()
+        } catch (e: Exception) {
+            _dataState.value = FeedModelState(error = true)
+        }
     }
 
 
@@ -136,7 +285,11 @@ class PostViewModel @Inject constructor(
                     _dataState.value = FeedModelState()
                 } catch (e: Exception) {
                     _dataState.value =
-                        FeedModelState(error = true, retryType = RetryTypes.SAVE, retryPost = it)
+                        FeedModelState(
+                            error = true,
+                            retryType = RetryTypes.SAVE,
+                            retryPost = it
+                        )
                 }
             }
         }
@@ -153,7 +306,11 @@ class PostViewModel @Inject constructor(
 
             } catch (e: Exception) {
                 _dataState.value =
-                    FeedModelState(error = true, retryType = RetryTypes.SAVE, retryPost = post)
+                    FeedModelState(
+                        error = true,
+                        retryType = RetryTypes.SAVE,
+                        retryPost = post
+                    )
             }
         }
     }
@@ -166,7 +323,11 @@ class PostViewModel @Inject constructor(
                 _dataState.value = FeedModelState()
             } catch (e: Exception) {
                 _dataState.value =
-                    FeedModelState(error = true, retryId = id, retryType = RetryTypes.REMOVE)
+                    FeedModelState(
+                        error = true,
+                        retryId = id,
+                        retryType = RetryTypes.REMOVE
+                    )
 
             }
 
@@ -210,7 +371,11 @@ class PostViewModel @Inject constructor(
                 _dataState.value = FeedModelState()
             } catch (e: Exception) {
                 _dataState.value =
-                    FeedModelState(error = true, retryType = RetryTypes.UNLIKE, retryId = id)
+                    FeedModelState(
+                        error = true,
+                        retryType = RetryTypes.UNLIKE,
+                        retryId = id
+                    )
             }
 
         }

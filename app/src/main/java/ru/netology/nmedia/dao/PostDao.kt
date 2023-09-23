@@ -16,6 +16,9 @@ interface PostDao {
 
     @Query("SELECT * FROM PostEntity WHERE hidden = 0 ORDER BY id DESC")
     fun getAllVisiblePagingSource(): PagingSource<Int, PostEntity>
+
+    @Query("UPDATE PostEntity SET hidden = 1 WHERE hidden = 0")
+    suspend fun getAllUnhidePagingSource()
     @Query("SELECT COUNT(*) == 0 FROM PostEntity")
     suspend fun isEmpty(): Boolean
 
